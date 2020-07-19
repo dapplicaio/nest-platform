@@ -72,7 +72,7 @@
     ACTION lvladdxp(eosio::name username, uint64_t xp);
 ```
 
-## nest smart comntract structures & tables
+## Smart Contract structures & tables
 
 ```c++
     struct player_s
@@ -284,4 +284,76 @@
 
       uint64_t primary_key() const {return username.value;}
     };
+```
+
+## Sample js calls
+
+```JavaScript
+//register game
+async function register_game() {
+  try {
+    await globals.WAX.transaction({
+      actions: [
+        {
+          account: globals.NEST_CONTRACT,
+          name: "gameregister",
+          authorization: [
+            {
+              actor: globals.WAX_ACCOUNT,
+              permission: "active",
+            },
+          ],
+          data: {
+            owner: globals.WAX_ACCOUNT, //your WAX account
+            gameurl: "", //URL to your game site
+            keywords: ["", ""], //array of keywords
+            description: "", //game's description
+            screenshots: [""], //array of URLs with game screenshots(at least 1)
+            videos: [""], //array of URLs with game videos(can be empty)
+            promscrshots: [""], //array of URLs with game promotional(can be empty)
+            price: "0 WAX", //Game's price
+            realisedate: "10 october 2123", //Realise date
+            data: "{}", //Another data on JSON-format
+          },
+        },
+      ],
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+//####################################################################################
+//##      Achievements functions
+//####################################################################################
+
+//create achievement
+async function create_achievement() {
+  try {
+    await globals.WAX.transaction({
+      actions: [
+        {
+          account: globals.NEST_CONTRACT,
+          name: "achievcreate",
+          authorization: [
+            {
+              actor: globals.WAX_ACCOUNT,
+              permission: "active",
+            },
+          ],
+          data: {
+            owner: globals.WAX_ACCOUNT, //Your WAX account
+            gameid: 0, //Your game's id
+            achievname: "", //Achievement name
+            description: "", //Description of achievement
+            image: "", //URL to achievement's image
+            rarity: "", //Achievement's rarity(check rarities on our documentation)
+          },
+        },
+      ],
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
 ```
