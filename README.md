@@ -92,13 +92,13 @@
     struct series_s
     {
       std::string               series;             //series name
-      std::vector<uint64_t>     cards;              //cards' ides of budge's cards
+      std::vector<uint64_t>     cards;              //cards' ids of budge's cards
     };
 
     struct achiev_s
     {
-      uint64_t                  gameid;             //game id on table
-      uint8_t                   maxachiev;          //number of achievements on current game
+      uint64_t                  gameid;             //game id table
+      uint8_t                   maxachiev;          //number of achievements of current game
       std::vector<uint64_t>     achievs;            //array of achievements
     };
 
@@ -112,10 +112,7 @@
       uint64_t lboardid{0};
       EOSLIB_SERIALIZE(global, (cardid)(badgeid)(achievid)(gameid)(lboardid))
     };
-    typedef eosio::singleton< "global"_n, global> conf;
-    global _cstate;
     
-
     TABLE lboard {
       uint64_t                  id;                 //nestcontract id on table
       eosio::name               owner;              //owner wax account name
@@ -192,7 +189,7 @@
 
     TABLE achievement
     {
-      uint64_t                  id{0};              //achievement's id on TABLE
+      uint64_t                  id{0};              //achievement's id
       uint64_t                  gameid{0};          //card's owner game id
       std::string               achievname;         //achievement's name
       std::string               description;        //achievement's description
@@ -245,7 +242,7 @@
       uint64_t                  id{0};              //badge TABLE id
       uint64_t                  gameid{0};          //badge's owner id
       std::string               badgename;          //badge's name
-      std::vector<uint64_t>     cardids;              //array of cards which includes on badge
+      std::vector<uint64_t>     cardids;            //array of cards which includes on badge
       bool                      candelete{1};       //badge can be deleted only if nobody has it
 
       uint64_t primary_key() const { return id; }
@@ -256,7 +253,7 @@
       uint64_t                  id{0};              //badge TABLE id
       uint64_t                  gameid{0};          //badge's owner id
       std::string               badgename;          //badge's name
-      std::vector<uint64_t>     cardids;              //array of cards which includes on badge
+      std::vector<uint64_t>     cardids;            //array of cards which includes on badge
 
       uint64_t primary_key() const { return id; }
     };
@@ -312,7 +309,7 @@ async function register_game() {
             videos: [""], //array of URLs with game videos(can be empty)
             promscrshots: [""], //array of URLs with game promotional(can be empty)
             price: "0 WAX", //Game's price
-            realisedate: "10 october 2123", //Realise date
+            realisedate: "10 october 2123", //Release date
             data: "{}", //Another data on JSON-format
           },
         },
@@ -347,7 +344,7 @@ async function create_achievement() {
             achievname: "", //Achievement name
             description: "", //Description of achievement
             image: "", //URL to achievement's image
-            rarity: "", //Achievement's rarity(check rarities on our documentation)
+            rarity: "", //Achievement's rarity
           },
         },
       ],
