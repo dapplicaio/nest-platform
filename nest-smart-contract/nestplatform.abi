@@ -4,6 +4,44 @@
     "types": [],
     "structs": [
         {
+            "name": "achiev",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "gameid",
+                    "type": "uint64"
+                },
+                {
+                    "name": "achievname",
+                    "type": "string"
+                },
+                {
+                    "name": "description",
+                    "type": "string"
+                },
+                {
+                    "name": "image",
+                    "type": "string"
+                },
+                {
+                    "name": "xp",
+                    "type": "uint64"
+                },
+                {
+                    "name": "rarity",
+                    "type": "string"
+                },
+                {
+                    "name": "candelete",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
             "name": "achiev_s",
             "base": "",
             "fields": [
@@ -52,6 +90,10 @@
                     "type": "string"
                 },
                 {
+                    "name": "xp",
+                    "type": "uint64"
+                },
+                {
                     "name": "description",
                     "type": "string"
                 },
@@ -70,10 +112,6 @@
             "base": "",
             "fields": [
                 {
-                    "name": "owner",
-                    "type": "name"
-                },
-                {
                     "name": "achieveid",
                     "type": "uint64"
                 }
@@ -83,10 +121,6 @@
             "name": "achievearn",
             "base": "",
             "fields": [
-                {
-                    "name": "owner",
-                    "type": "name"
-                },
                 {
                     "name": "username",
                     "type": "name"
@@ -98,7 +132,7 @@
             ]
         },
         {
-            "name": "achievement",
+            "name": "achievxp",
             "base": "",
             "fields": [
                 {
@@ -106,33 +140,27 @@
                     "type": "uint64"
                 },
                 {
-                    "name": "gameid",
+                    "name": "xp",
                     "type": "uint64"
-                },
-                {
-                    "name": "achievname",
-                    "type": "string"
-                },
-                {
-                    "name": "description",
-                    "type": "string"
-                },
-                {
-                    "name": "image",
-                    "type": "string"
-                },
-                {
-                    "name": "rarity",
-                    "type": "string"
-                },
-                {
-                    "name": "candelete",
-                    "type": "bool"
                 }
             ]
         },
         {
             "name": "addfriend",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "newfriend",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "applyfriend",
             "base": "",
             "fields": [
                 {
@@ -168,6 +196,10 @@
                 {
                     "name": "image",
                     "type": "string"
+                },
+                {
+                    "name": "xp",
+                    "type": "uint64"
                 },
                 {
                     "name": "rarity",
@@ -228,7 +260,7 @@
             ]
         },
         {
-            "name": "apprgame",
+            "name": "apprgametbl",
             "base": "",
             "fields": [
                 {
@@ -280,7 +312,7 @@
                     "type": "uint64[]"
                 },
                 {
-                    "name": "realisedate",
+                    "name": "releasedate",
                     "type": "string"
                 },
                 {
@@ -373,10 +405,6 @@
             "name": "badgedelete",
             "base": "",
             "fields": [
-                {
-                    "name": "owner",
-                    "type": "name"
-                },
                 {
                     "name": "badgeid",
                     "type": "uint64"
@@ -480,10 +508,6 @@
             "base": "",
             "fields": [
                 {
-                    "name": "owner",
-                    "type": "name"
-                },
-                {
                     "name": "cardid",
                     "type": "uint64"
                 }
@@ -494,16 +518,26 @@
             "base": "",
             "fields": [
                 {
-                    "name": "owner",
-                    "type": "name"
-                },
-                {
                     "name": "cardid",
                     "type": "uint64"
                 },
                 {
                     "name": "username",
                     "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "carddropset",
+            "base": "",
+            "fields": [
+                {
+                    "name": "maxdrop",
+                    "type": "uint8"
+                },
+                {
+                    "name": "maxonseries",
+                    "type": "uint8"
                 }
             ]
         },
@@ -529,10 +563,6 @@
             "name": "createprize",
             "base": "",
             "fields": [
-                {
-                    "name": "owner",
-                    "type": "name"
-                },
                 {
                     "name": "boardid",
                     "type": "uint64"
@@ -562,64 +592,16 @@
             ]
         },
         {
-            "name": "game",
+            "name": "friendapply",
             "base": "",
             "fields": [
                 {
-                    "name": "id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "owner",
+                    "name": "account",
                     "type": "name"
                 },
                 {
-                    "name": "gameurl",
-                    "type": "string"
-                },
-                {
-                    "name": "keywords",
-                    "type": "string[]"
-                },
-                {
-                    "name": "description",
-                    "type": "string"
-                },
-                {
-                    "name": "screenshots",
-                    "type": "string[]"
-                },
-                {
-                    "name": "videos",
-                    "type": "string[]"
-                },
-                {
-                    "name": "promscrshots",
-                    "type": "string[]"
-                },
-                {
-                    "name": "price",
-                    "type": "asset"
-                },
-                {
-                    "name": "customtitles",
-                    "type": "string[]"
-                },
-                {
-                    "name": "achievements",
-                    "type": "uint64[]"
-                },
-                {
-                    "name": "badges",
-                    "type": "uint64[]"
-                },
-                {
-                    "name": "realisedate",
-                    "type": "string"
-                },
-                {
-                    "name": "data",
-                    "type": "string"
+                    "name": "friends",
+                    "type": "name[]"
                 }
             ]
         },
@@ -688,7 +670,7 @@
                     "type": "asset"
                 },
                 {
-                    "name": "realisedate",
+                    "name": "releasedate",
                     "type": "string"
                 },
                 {
@@ -698,11 +680,11 @@
             ]
         },
         {
-            "name": "gameupdate",
+            "name": "gametbl",
             "base": "",
             "fields": [
                 {
-                    "name": "gameid",
+                    "name": "id",
                     "type": "uint64"
                 },
                 {
@@ -738,7 +720,69 @@
                     "type": "asset"
                 },
                 {
-                    "name": "realisedate",
+                    "name": "customtitles",
+                    "type": "string[]"
+                },
+                {
+                    "name": "achievements",
+                    "type": "uint64[]"
+                },
+                {
+                    "name": "badges",
+                    "type": "uint64[]"
+                },
+                {
+                    "name": "releasedate",
+                    "type": "string"
+                },
+                {
+                    "name": "data",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "gameupdate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "gameid",
+                    "type": "uint64"
+                },
+                {
+                    "name": "new_owner",
+                    "type": "name"
+                },
+                {
+                    "name": "gameurl",
+                    "type": "string"
+                },
+                {
+                    "name": "keywords",
+                    "type": "string[]"
+                },
+                {
+                    "name": "description",
+                    "type": "string"
+                },
+                {
+                    "name": "screenshots",
+                    "type": "string[]"
+                },
+                {
+                    "name": "videos",
+                    "type": "string[]"
+                },
+                {
+                    "name": "promscrshots",
+                    "type": "string[]"
+                },
+                {
+                    "name": "price",
+                    "type": "asset"
+                },
+                {
+                    "name": "releasedate",
                     "type": "string"
                 },
                 {
@@ -910,16 +954,38 @@
             ]
         },
         {
+            "name": "rategame",
+            "base": "",
+            "fields": [
+                {
+                    "name": "gameid",
+                    "type": "uint64"
+                },
+                {
+                    "name": "totalstars",
+                    "type": "uint64"
+                },
+                {
+                    "name": "totalvotes",
+                    "type": "uint64"
+                },
+                {
+                    "name": "rate",
+                    "type": "float64"
+                },
+                {
+                    "name": "coments",
+                    "type": "string[]"
+                }
+            ]
+        },
+        {
             "name": "removelboard",
             "base": "",
             "fields": [
                 {
                     "name": "boardid",
                     "type": "uint64"
-                },
-                {
-                    "name": "owner",
-                    "type": "name"
                 }
             ]
         },
@@ -927,10 +993,6 @@
             "name": "resetlboard",
             "base": "",
             "fields": [
-                {
-                    "name": "owner",
-                    "type": "name"
-                },
                 {
                     "name": "boardid",
                     "type": "uint64"
@@ -956,13 +1018,37 @@
             ]
         },
         {
-            "name": "update",
+            "name": "setupdrop",
             "base": "",
             "fields": [
                 {
-                    "name": "owner",
+                    "name": "maxdrops",
+                    "type": "uint8"
+                },
+                {
+                    "name": "maxonseries",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "startround",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
                     "type": "name"
                 },
+                {
+                    "name": "gameid",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "update",
+            "base": "",
+            "fields": [
                 {
                     "name": "boardid",
                     "type": "uint64"
@@ -1048,6 +1134,10 @@
             "base": "",
             "fields": [
                 {
+                    "name": "author",
+                    "type": "name"
+                },
+                {
                     "name": "username",
                     "type": "name"
                 }
@@ -1112,8 +1202,18 @@
             "ricardian_contract": ""
         },
         {
+            "name": "achievxp",
+            "type": "achievxp",
+            "ricardian_contract": ""
+        },
+        {
             "name": "addfriend",
             "type": "addfriend",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "applyfriend",
+            "type": "applyfriend",
             "ricardian_contract": ""
         },
         {
@@ -1217,6 +1317,16 @@
             "ricardian_contract": ""
         },
         {
+            "name": "setupdrop",
+            "type": "setupdrop",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "startround",
+            "type": "startround",
+            "ricardian_contract": ""
+        },
+        {
             "name": "update",
             "type": "update",
             "ricardian_contract": ""
@@ -1244,8 +1354,8 @@
     ],
     "tables": [
         {
-            "name": "achievements",
-            "type": "achievement",
+            "name": "achievs",
+            "type": "achiev",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
@@ -1272,8 +1382,8 @@
             "key_types": []
         },
         {
-            "name": "apprgames",
-            "type": "apprgame",
+            "name": "apprgametbls",
+            "type": "apprgametbl",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
@@ -1293,8 +1403,22 @@
             "key_types": []
         },
         {
+            "name": "carddropset",
+            "type": "carddropset",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
             "name": "cards",
             "type": "card",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "friendapplys",
+            "type": "friendapply",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
@@ -1307,8 +1431,8 @@
             "key_types": []
         },
         {
-            "name": "games",
-            "type": "game",
+            "name": "gametbls",
+            "type": "gametbl",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
@@ -1330,6 +1454,13 @@
         {
             "name": "levels",
             "type": "level",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "rategames",
+            "type": "rategame",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

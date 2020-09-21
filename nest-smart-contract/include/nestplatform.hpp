@@ -9,52 +9,54 @@
 
 using namespace std;
 
-#define CONTRACTN eosio::name("nestcontract")
+#define CONTRACTN eosio::name("nestplatform")
 #define SIMPLEASSETSCONTRACT eosio::name("simpleassets")
 
-CONTRACT nestcontract : public eosio::contract {
+CONTRACT nestplatform : public eosio::contract {
   public:
     using contract::contract;
 
     ////////////////////////////////////////////////////////////////////////////////
-    //        nestcontract ACTIONS
+    //        nestplatform ACTIONS
     ////////////////////////////////////////////////////////////////////////////////
     ACTION createlboard(eosio::name owner, string boardname, uint64_t gameid);
-    ACTION createprize(eosio::name owner, uint64_t boardid, uint8_t mode, string value);
-    ACTION resetlboard(eosio::name owner, uint64_t boardid, bool resetpool);
-    ACTION removelboard(uint64_t boardid, eosio::name owner);
-    ACTION update(eosio::name owner, uint64_t boardid, eosio::name username, double points, string data);
+    ACTION createprize(uint64_t boardid, uint8_t mode, string value);
+    ACTION resetlboard(uint64_t boardid, bool resetpool);
+    ACTION removelboard(uint64_t boardid);
+    ACTION update(uint64_t boardid, eosio::name username, double points, string data);
 
 
     ////////////////////////////////////////////////////////////////////////////////
     //        GAME ACTIONS
     ////////////////////////////////////////////////////////////////////////////////
     ACTION gameregister(eosio::name  owner, std::string gameurl, std::vector<std::string> keywords, std::string description, std::vector<std::string> screenshots, 
-                    std::vector<std::string> videos, std::vector<std::string> promscrshots, eosio::asset price, std::string realisedate, std::string data);
-    ACTION gameupdate(uint64_t gameid, eosio::name  owner, std::string gameurl, std::vector<std::string> keywords, std::string description, std::vector<std::string> screenshots, 
-                    std::vector<std::string> videos, std::vector<std::string> promscrshots, eosio::asset price, std::string realisedate, std::string data);
+                    std::vector<std::string> videos, std::vector<std::string> promscrshots, eosio::asset price, std::string releasedate, std::string data);
+    ACTION gameupdate(uint64_t gameid, eosio::name  new_owner, std::string gameurl, std::vector<std::string> keywords, std::string description, std::vector<std::string> screenshots, 
+                    std::vector<std::string> videos, std::vector<std::string> promscrshots, eosio::asset price, std::string releasedate, std::string data);
     ACTION gameapprove(uint64_t appgameid, bool approve);
-
+    //ACTION gamerate(eosio::name username, uint64_t gameid, uint8_t rate, std::string comment);
 
 
     ////////////////////////////////////////////////////////////////////////////////
     //        USER ACTIONS
     ////////////////////////////////////////////////////////////////////////////////
-    ACTION usercreate(eosio::name username);
+    ACTION usercreate(eosio::name author,eosio::name username);
     ACTION userregister(eosio::name username,std::string avatar, std::string nickname);
     ACTION userupdate(eosio::name username,std::string avatar, std::string nickname);
     ACTION userapprove(eosio::name username, bool approve);
     ACTION addfriend(eosio::name username, eosio::name newfriend);
     ACTION deletefriend(eosio::name username, eosio::name delfriend);
+    ACTION applyfriend(eosio::name username, eosio::name newfriend);
     
 
 
     ////////////////////////////////////////////////////////////////////////////////
     //        ACHIEVEMENTS ACTIONS
     ////////////////////////////////////////////////////////////////////////////////
-    ACTION achievcreate(eosio::name owner, uint64_t gameid, std::string achievname, std::string description, std::string image, std::string rarity);
-    ACTION achievdelete(eosio::name owner, uint64_t achieveid);
-    ACTION achievearn(eosio::name owner, eosio::name username, uint64_t achieveid);
+    ACTION achievcreate(eosio::name owner, uint64_t gameid, std::string achievname, uint64_t xp, std::string description, std::string image, std::string rarity);
+    ACTION achievxp(uint64_t id, uint64_t xp);
+    ACTION achievdelete(uint64_t achieveid);
+    ACTION achievearn(eosio::name username, uint64_t achieveid);
     ACTION achievapprove(uint64_t achieveid, bool approve);
 
 
@@ -63,9 +65,10 @@ CONTRACT nestcontract : public eosio::contract {
     //        CARDS ACTIONS
     ////////////////////////////////////////////////////////////////////////////////
     ACTION cardcreate(eosio::name owner, uint64_t gameid, std::string cardname, std::string enableimg, std::string disableimg, std::string series);
-    ACTION carddelete(eosio::name owner, uint64_t cardid);
-    ACTION carddrop(eosio::name owner, uint64_t cardid, eosio::name username);
+    ACTION carddelete( uint64_t cardid);
+    ACTION carddrop(uint64_t cardid, eosio::name username);
     ACTION cardapprove(uint64_t cardid, bool approve);
+    ACTION setupdrop(uint8_t maxdrops, uint8_t maxonseries);
 
 
 
@@ -73,7 +76,7 @@ CONTRACT nestcontract : public eosio::contract {
     //        BADGES ACTIONS
     ////////////////////////////////////////////////////////////////////////////////
     ACTION badgecreate(eosio::name owner, uint64_t gameid, std::string badgename, std::vector<uint64_t> cardids);
-    ACTION badgedelete(eosio::name owner, uint64_t badgeid);
+    ACTION badgedelete(uint64_t badgeid);
     ACTION badgeapprove(uint64_t gameid, bool approve);
     ACTION badgeearn(eosio::name username, uint64_t badgeid);
 
@@ -86,6 +89,12 @@ CONTRACT nestcontract : public eosio::contract {
     ACTION lvlupdate(uint64_t level, uint64_t xp);
     ACTION lvlearn(eosio::name username);
     ACTION lvladdxp(eosio::name username, uint64_t xp);
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //        INGAME ACTIONS
+    ////////////////////////////////////////////////////////////////////////////////
+    ACTION startround(eosio::name username, uint64_t gameid);
 
 
   private:
@@ -132,11 +141,11 @@ CONTRACT nestcontract : public eosio::contract {
     
 
     TABLE lboard {
-      uint64_t                  id;                 //nestcontract id on table
+      uint64_t                  id;                 //nestplatform id on table
       eosio::name               owner;              //owner wax account name
       string                    boardname;          //name of current board
       uint64_t                  gameid;             //game's id
-      double                    pot;                //total pot on current nestcontract
+      double                    pot;                //total pot on current nestplatform
       vector<player_s>          players;            //array of players
       prize_s                   prize;              //array and type of prizes
 
@@ -144,7 +153,7 @@ CONTRACT nestcontract : public eosio::contract {
     };
     typedef eosio::multi_index<eosio::name("lboards"), lboard> lboards;
 
-    TABLE game
+    TABLE gametbl
     {
       uint64_t                  id{0};              //game id on games table
       eosio::name               owner;              //owner WAX account
@@ -158,15 +167,15 @@ CONTRACT nestcontract : public eosio::contract {
       std::vector<std::string>  customtitles;       //array of user's custom titles
       std::vector<uint64_t>     achievements;       //array of achievements' IDs on TABLE achievements
       std::vector<uint64_t>     badges;             //array of badges' IDs on TAVLE badges
-      std::string               realisedate;        //realise date on string format
+      std::string               releasedate;        //realise date on string format
       std::string               data;               //game data on JSON format
 
       uint64_t primary_key() const {return id;}
     };
 
-    typedef eosio::multi_index<eosio::name("games"), game> games;
+    typedef eosio::multi_index<eosio::name("gametbls"), gametbl> games;
 
-    TABLE apprgame
+    TABLE apprgametbl
     {
       uint64_t                  id{0};              //game id on games table
       eosio::name               owner;              //owner WAX account
@@ -180,19 +189,32 @@ CONTRACT nestcontract : public eosio::contract {
       std::vector<std::string>  customtitles;       //array of user's custom titles
       std::vector<uint64_t>     achievements;       //array of achievements' IDs on TABLE achievements
       std::vector<uint64_t>     badges;             //array of badges' IDs on TAVLE badges
-      std::string               realisedate;        //realise date on string format
+      std::string               releasedate;        //realise date on string format
       std::string               data;               //game data on JSON format
 
       uint64_t primary_key() const {return id;}
     };
 
-    typedef eosio::multi_index<eosio::name("apprgames"), apprgame> apprgames;
+    typedef eosio::multi_index<eosio::name("apprgametbls"), apprgametbl> apprgames;
+
+    TABLE rategame
+    {
+      uint64_t                  gameid{0};          //game id on games table
+      uint64_t                  totalstars{0};      //total stars on game
+      uint64_t                  totalvotes{0};      //total votes on game
+      double                    rate{0.0};          //game's rate
+      std::vector<std::string>  coments;            //coments on game
+
+      uint64_t primary_key() const {return gameid;}
+    };
+
+    typedef eosio::multi_index<eosio::name("rategames"), rategame> rategames;
 
     TABLE user
     {
       eosio::name               account;            //user's WAX account
       std::string               nickname;           //user's nickname
-      std::string               avatar;             //user's avatar URL
+      std::string               avatar;             //user's avarat URL
       uint64_t                  level{0};           //current user's level
       uint64_t                  xp{0};              //current user's points
       std::vector<achiev_s>     achievements;       //array of user's achievements
@@ -207,27 +229,38 @@ CONTRACT nestcontract : public eosio::contract {
     {
       eosio::name               account;            //user's WAX account
       std::string               nickname;           //user's nickname
-      std::string               avatar;             //user's avatar URL
+      std::string               avatar;             //user's avarat URL
 
       uint64_t primary_key() const {return account.value;}
     };
 
     typedef eosio::multi_index<eosio::name("apprusers"), appruser> apprusers;
 
-    TABLE achievement
+    TABLE friendapply
+    {
+      eosio::name               account;            //user's WAX account
+      std::vector<eosio::name>  friends;            //user's friends to apply
+
+      uint64_t primary_key() const {return account.value;}
+    };
+
+    typedef eosio::multi_index<eosio::name("friendapplys"), friendapply> friendapplys;
+
+    TABLE achiev
     {
       uint64_t                  id{0};              //achievement's id on TABLE
       uint64_t                  gameid{0};          //card's owner game id
       std::string               achievname;         //achievement's name
       std::string               description;        //achievement's description
       std::string               image;              //achievement's image URL
+      uint64_t                  xp{0};              //achievement's xp
       std::string               rarity;             //achievement's rarity
       bool                      candelete;          //achievement can be deleted only if nobody has it
 
       uint64_t primary_key() const { return id;}
     };
 
-    typedef eosio::multi_index<eosio::name("achievements"), achievement> achievements;
+    typedef eosio::multi_index<eosio::name("achievs"), achiev> achievements;
 
     TABLE appracheiv
     {
@@ -236,6 +269,7 @@ CONTRACT nestcontract : public eosio::contract {
       std::string               achievname;         //achievement's name
       std::string               description;        //achievement's description
       std::string               image;              //achievement's image URL
+      uint64_t                  xp{0};              //achievement's xp
       std::string               rarity;             //achievement's rarity
 
       uint64_t primary_key() const { return id;}
@@ -312,7 +346,7 @@ CONTRACT nestcontract : public eosio::contract {
     TABLE gamecard
     {
       uint64_t                  gameid{0};           //game id
-      std::vector<series_s>     series;              //array with card seria data
+      std::vector<series_s>     series;              //array with card series data
 
       uint64_t primary_key() const {return gameid;}
     };
@@ -329,9 +363,19 @@ CONTRACT nestcontract : public eosio::contract {
 
     typedef eosio::multi_index<eosio::name("usercards"), usercard> usercards;
 
+    TABLE carddropset
+    {
+      carddropset() {}
+	    uint8_t maxdrop{0};
+      uint8_t maxonseries{0};
+      EOSLIB_SERIALIZE(carddropset, (maxdrop)(maxonseries))
+    };
+    typedef eosio::singleton< eosio::name("carddropset"), carddropset> carddrset;
+    carddropset _cdrops;
+
   public:
   
-  nestcontract(eosio::name receiver, eosio::name code, eosio::datastream<const char *> ds) : contract(receiver, code, ds) {}
+  nestplatform(eosio::name receiver, eosio::name code, eosio::datastream<const char *> ds) : contract(receiver, code, ds) {}
   int finder(std::vector<player_s> players, eosio::name username);
   int finder(std::vector<eosio::name> friends, eosio::name username);
   int finder(std::vector<achiev_s> achieves, uint64_t gameid);
