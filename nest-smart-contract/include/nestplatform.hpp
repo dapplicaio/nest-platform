@@ -126,6 +126,12 @@ CONTRACT nestplatform : public eosio::contract {
       std::vector<uint64_t>     achievs;            //array of achievements
     };
 
+    struct card_s
+    {
+      uint64_t                  card_id;            //card id on table
+      uint32_t                  amount;             //number of cards
+    };
+
     TABLE global
     {
       global() {}
@@ -353,15 +359,25 @@ CONTRACT nestplatform : public eosio::contract {
 
     typedef eosio::multi_index<eosio::name("gamecards"), gamecard> gamecards;
 
-    TABLE usercard
+    TABLE usercardd
     {
       eosio::name               username;             //user's wax account
-      std::vector<uint64_t>     cardids;              //array of owned cards' ids
+      std::vector<card_s>       cardids;              //array of owned cards' ids
 
       uint64_t primary_key() const {return username.value;}
     };
 
-    typedef eosio::multi_index<eosio::name("usercards"), usercard> usercards;
+    typedef eosio::multi_index<eosio::name("usercardds"), usercardd> usercards;
+
+    TABLE userbadge
+    {
+      eosio::name               username;             //user's wax account
+      std::vector<uint64_t>     badge_id;             //array of owned cards' ids
+
+      uint64_t primary_key() const {return username.value;}
+    };
+
+    typedef eosio::multi_index<eosio::name("userbadges"), userbadge> userbadges;
 
     TABLE carddropset
     {
@@ -380,6 +396,7 @@ CONTRACT nestplatform : public eosio::contract {
   int finder(std::vector<eosio::name> friends, eosio::name username);
   int finder(std::vector<achiev_s> achieves, uint64_t gameid);
   int finder(std::vector<series_s> series, std::string ser_name);
+  int finder(std::vector<card_s> cards, uint64_t card_id);
   int finder(std::vector<uint64_t> ids, uint64_t id);
   uint64_t get_achiev_points(std::string rarity);
   uint64_t getcardid();

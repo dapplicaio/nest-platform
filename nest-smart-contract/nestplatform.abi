@@ -460,6 +460,20 @@
             ]
         },
         {
+            "name": "card_s",
+            "base": "",
+            "fields": [
+                {
+                    "name": "card_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "amount",
+                    "type": "uint32"
+                }
+            ]
+        },
+        {
             "name": "cardapprove",
             "base": "",
             "fields": [
@@ -1116,7 +1130,21 @@
             ]
         },
         {
-            "name": "usercard",
+            "name": "userbadge",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "badge_id",
+                    "type": "uint64[]"
+                }
+            ]
+        },
+        {
+            "name": "usercardd",
             "base": "",
             "fields": [
                 {
@@ -1125,7 +1153,7 @@
                 },
                 {
                     "name": "cardids",
-                    "type": "uint64[]"
+                    "type": "card_s[]"
                 }
             ]
         },
@@ -1466,8 +1494,15 @@
             "key_types": []
         },
         {
-            "name": "usercards",
-            "type": "usercard",
+            "name": "userbadges",
+            "type": "userbadge",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "usercardds",
+            "type": "usercardd",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
