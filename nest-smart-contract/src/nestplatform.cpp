@@ -620,17 +620,25 @@ ACTION nestplatform::carddrop(uint64_t cardid, eosio::name username)
     {
         _usercards.emplace(CONTRACTN, [&](auto &new_record) {
             new_record.username = username;
-            new_record.cardids.push_back(cardid);
+            new_record.cardids.push_back({cardid,1});
         });
     }
     else
     {
+        int card_vec_id = finder(usercard_itr->cardids,cardid);
         _usercards.modify(usercard_itr, CONTRACTN, [&](auto &mod_record) {
-            mod_record.cardids.push_back(cardid);
+            if(card_vec_id == -1)
+            {
+                mod_record.cardids.push_back({cardid,1});
+            }
+            else
+            {
+                mod_record.cardids.at(card_vec_id).amount++;
+            }
         });
     }
 
-    std::string idata = "{\"name\":\"" + card_itr->cardname + "\", \"gameid\":" + std::to_string(card_itr->gameid) + ", \"series\":\"" + card_itr->series + "\" }";
+    /*std::string idata = "{\"name\":\"" + card_itr->cardname + "\", \"gameid\":" + std::to_string(card_itr->gameid) + ", \"series\":\"" + card_itr->series + "\" }";
     std::string mdata = "{\"img\": \"" + card_itr->enableimg + "\" }";
 
     eosio::action createAsset = eosio::action(
@@ -638,7 +646,7 @@ ACTION nestplatform::carddrop(uint64_t cardid, eosio::name username)
         SIMPLEASSETSCONTRACT,
         eosio::name("create"),
         std::make_tuple(CONTRACTN, eosio::name("card"), game_itr->owner, idata, mdata, 0));
-    createAsset.send();
+    createAsset.send();*/
 }
 
 ACTION nestplatform::cardapprove(uint64_t cardid, bool approve)
@@ -898,6 +906,24 @@ ACTION nestplatform::badgeearn(eosio::name username, uint64_t badgeid)
 
     eosio::check(is_badge == true, "User hasn't all cards from this badge.");
 
+    userbadges _userbadges(CONTRACTN,CONTRACTN.value);
+    auto badge_usr_itr = _userbadges.find(username.value);
+    if(badge_usr_itr == _userbadges.end())
+    {
+        _userbadges.emplace(CONTRACTN,[&](auto& new_badge_rec){
+            new_badge_rec.username = username;
+            new_badge_rec.badge_id.push_back(badgeid);
+        });
+    }
+    else
+    {
+        int badge_arr_id = finder(badge_usr_itr->badge_id, badgeid);
+        eosio::check(badge_arr_id == -1,"User had current badge.");
+        _userbadges.modify(badge_usr_itr,CONTRACTN,[&](auto& mod_badge_rec){
+            mod_badge_rec.badge_id.push_back(badgeid);
+        });
+    }
+
     levels _levels(CONTRACTN, CONTRACTN.value);
     auto lvl_itr = _levels.find(user_itr->level);
     eosio::check(lvl_itr != _levels.end(), "Level doesn't exist");
@@ -1129,6 +1155,18 @@ int nestplatform::finder(std::vector<achiev_s> achieves, uint64_t gameid)
     for (uint64_t i = 0; i < achieves.size(); i++)
     {
         if (achieves.at(i).gameid == gameid)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int nestplatform::finder(std::vector<card_s> cards, uint64_t card_id)
+{
+    for (uint64_t i = 0; i < cards.size(); i++)
+    {
+        if (cards.at(i).card_id == card_id)
         {
             return i;
         }
