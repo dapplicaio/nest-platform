@@ -1,356 +1,712 @@
-## Smart Contract actions
- ```c++
-    ////////////////////////////////////////////////////////////////////////////////
-    //        nestcontract ACTIONS
-    ////////////////////////////////////////////////////////////////////////////////
-    ACTION createlboard(eosio::name owner, string boardname, uint64_t gameid);
-    ACTION createprize(eosio::name owner, uint64_t boardid, uint8_t mode, string value);
-    ACTION resetlboard(eosio::name owner, uint64_t boardid, bool resetpool);
-    ACTION removelboard(uint64_t boardid, eosio::name owner);
-    ACTION update(eosio::name owner, uint64_t boardid, eosio::name username, double points, string data);
+# NEST
 
+Nest - game platform for products and gamers.
 
-    ////////////////////////////////////////////////////////////////////////////////
-    //        GAME ACTIONS
-    ////////////////////////////////////////////////////////////////////////////////
-    ACTION gameregister(eosio::name  owner, std::string gameurl, std::vector<std::string> keywords, std::string description, std::vector<std::string> screenshots, 
-                    std::vector<std::string> videos, std::vector<std::string> promscrshots, eosio::asset price, std::string realisedate, std::string data);
-    ACTION gameupdate(uint64_t gameid, eosio::name  owner, std::string gameurl, std::vector<std::string> keywords, std::string description, std::vector<std::string> screenshots, 
-                    std::vector<std::string> videos, std::vector<std::string> promscrshots, eosio::asset price, std::string realisedate, std::string data);
-    ACTION gameapprove(uint64_t appgameid, bool approve);
+--------------------------
+# Example game: 2048
+##### https://nest.dapplica.io/2048 
+### Register game
+-----------------
+##### JS Sample
+```js
+const NESTCONTRACT = "nestplatform";
+const author = "nestgameshub";
+var game_url = "https://nest.dapplica.io/games/2048";
+var keywords = ["1024","2048","numbers"];
+var description = "It is a spinoff of popular 1024 game, but in this case you have to get 2048 in order to win the game";
+var price = "0.00000000 WAX";
+var releasedate = "10 September 2020";
 
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //        USER ACTIONS
-    ////////////////////////////////////////////////////////////////////////////////
-    ACTION usercreate(eosio::name username);
-    ACTION userregister(eosio::name username,std::string avatar, std::string nickname);
-    ACTION userupdate(eosio::name username,std::string avatar, std::string nickname);
-    ACTION userapprove(eosio::name username, bool approve);
-    ACTION addfriend(eosio::name username, eosio::name newfriend);
-    ACTION deletefriend(eosio::name username, eosio::name delfriend);
-    
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //        ACHIEVEMENTS ACTIONS
-    ////////////////////////////////////////////////////////////////////////////////
-    ACTION achievcreate(eosio::name owner, uint64_t gameid, std::string achievname, std::string description, std::string image, std::string rarity);
-    ACTION achievdelete(eosio::name owner, uint64_t achieveid);
-    ACTION achievearn(eosio::name owner, eosio::name username, uint64_t achieveid);
-    ACTION achievapprove(uint64_t achieveid, bool approve);
-
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //        CARDS ACTIONS
-    ////////////////////////////////////////////////////////////////////////////////
-    ACTION cardcreate(eosio::name owner, uint64_t gameid, std::string cardname, std::string enableimg, std::string disableimg, std::string series);
-    ACTION carddelete(eosio::name owner, uint64_t cardid);
-    ACTION carddrop(eosio::name owner, uint64_t cardid, eosio::name username);
-    ACTION cardapprove(uint64_t cardid, bool approve);
-
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //        BADGES ACTIONS
-    ////////////////////////////////////////////////////////////////////////////////
-    ACTION badgecreate(eosio::name owner, uint64_t gameid, std::string badgename, std::vector<uint64_t> cardids);
-    ACTION badgedelete(eosio::name owner, uint64_t badgeid);
-    ACTION badgeapprove(uint64_t gameid, bool approve);
-    ACTION badgeearn(eosio::name username, uint64_t badgeid);
-
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-    //        LEVEL ACTIONS
-    ////////////////////////////////////////////////////////////////////////////////
-    ACTION lvlcreate(uint64_t level, uint64_t xp);
-    ACTION lvlupdate(uint64_t level, uint64_t xp);
-    ACTION lvlearn(eosio::name username);
-    ACTION lvladdxp(eosio::name username, uint64_t xp);
+try {
+  const result = await WAX.transact(
+    {
+        actions: [
+          {
+            account: NESTCONTRACT,
+            name: 'gameregister',
+            authorization: [{
+              actor: author,
+              permission: 'active',
+            }],
+            data: {
+              owner: author,
+              gameurl: game_url,
+              keywords: keywords,
+              description: description,
+              screenshots: [""],
+              videos: [""],
+              promscrshots: [],
+              price: price,
+              releasedata: releasedata,
+              data: ""
+            },
+          }]
+         }, 
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+    });         
+} catch (error) {
+  console.log(error);
+}
 ```
-
-## Smart Contract structures & tables
-
+##### Contract Sample
 ```c++
-    struct player_s
-    {
-      eosio::name               account;            //user wax account
-      double                    points;             //user points
-      string                    data;               //user data on JSON
-      double                    payout;             //user payouts
-    };
+name NESTCONTRACT = name("nestplatform");
 
-    struct prize_s
-    {
-      uint8_t                   mode;               //prize mode: 0 - absolute numbers, 1 - percents
-      vector<double>            values;             //users' prizes parts
-    };
+name author = get_self();
+string game_url = "https://nest.dapplica.io/games/2048";
+vector<string> keywords[] = {"1024","2048","numbers"};
+string description = "It is a spinoff of popular 1024 game, but in this case you have to get 2048 in order to win the game";
+vector<string> empty_string_vector[] = {""};
+vector<string> empty_vector[];
+asset price = asset(0, eosio::symbol("WAX", 8));
+string releasedate = "10 September 2020";
 
-    struct series_s
-    {
-      std::string               series;             //series name
-      std::vector<uint64_t>     cards;              //cards' ids of budge's cards
-    };
+action createGame = action(
+	permission_level{author, name("active")},
+	NESTCONTRACT,
+	name("gameregister"),
+	std::make_tuple( author, game_url, keywords, description, empty_string_vector, empty_string_vector, empty_string_vector, price, releasedate, string(""))
+);
+createGame.send();	
+```
+-------------------------------
+### Create achievement
+-------------------------------
+##### JS Sample
+```js
+const NESTCONTRACT = "nestplatform";
+const author = "nestgameshub";
+var game_url = "https://nest.dapplica.io/games/2048";
+var gameid = 3;
+var achiev_name = "Played total 1 game";
+var description = "Played total one 2048 game round";
+var image = "https://nest.dapplica.io/games/2048/images/achievement1.png";
+var xp = 40;
+var rarity = "Common";
 
-    struct achiev_s
+try {
+  const result = await WAX.transact(
     {
-      uint64_t                  gameid;             //game id table
-      uint8_t                   maxachiev;          //number of achievements of current game
-      std::vector<uint64_t>     achievs;            //array of achievements
-    };
+        actions: [
+          {
+            account: NESTCONTRACT,
+            name: 'achievcreate',
+            authorization: [{
+              actor: author,
+              permission: 'active',
+            }],
+            data: {
+              owner: author,
+              gameid: gameid,
+              achievname: achiev_name,
+              xp: xp,
+              description: description,
+              image: image,
+              rarity: rarity
+            },
+          }]
+         }, 
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+    });         
+} catch (error) {
+  console.log(error);
+}
+```
+##### Contract Sample
+```c++
+name NESTCONTRACT = name("nestplatform");
 
-    TABLE global
+name author = get_self();
+string game_url = "https://nest.dapplica.io/games/2048";
+uint64_t gameid = 3;
+string achiev_name = "Played total 1 game";
+string description = "Played total one 2048 game round";
+string image = "https://nest.dapplica.io/games/2048/images/achievement1.png";
+uint64_t xp = 40;
+string rarity = "Common";
+
+action createAchieve = action(
+	permission_level{author, name("active")},
+	NESTCONTRACT,
+	name("achievcreate"),
+	std::make_tuple( author, gameid, achiev_name, xp, description, image, rarity)
+);
+createAchieve.send();	
+```
+-------------------------------
+### Create leader board
+-------------------------------
+##### JS Sample
+```js
+const NESTCONTRACT = "nestplatform";
+const author = "nestgameshub";
+var boardname = "General";
+var gameid = 3;
+
+try {
+  const result = await WAX.transact(
     {
-      global() {}
-	    uint64_t cardid{0};
-      uint64_t badgeid{0};
-      uint64_t achievid{0};
-      uint64_t gameid{0};
-      uint64_t lboardid{0};
-      EOSLIB_SERIALIZE(global, (cardid)(badgeid)(achievid)(gameid)(lboardid))
-    };
+        actions: [
+          {
+            account: NESTCONTRACT,
+            name: 'createlboard',
+            authorization: [{
+              actor: author,
+              permission: 'active',
+            }],
+            data: {
+              owner: author,
+              boardname: boardname,
+              gameid: gameid
+            },
+          }]
+         }, 
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+    });         
+} catch (error) {
+  console.log(error);
+}
+```
+##### Contract Sample
+```c++
+name NESTCONTRACT = name("nestplatform");
+
+name author = get_self();
+string boardname = "General";
+uint64_t gameid = 3;
+
+action createLBoard = action(
+	permission_level{author, name("active")},
+	NESTCONTRACT,
+	name("createlboard"),
+	std::make_tuple( author, boardname, gameid)
+);
+createLBoard.send();	
+```
+----------------------------
+### Create leader board prize
+-------------------------------
+##### JS Sample
+```js
+const NESTCONTRACT = "nestplatform";
+var boardid = 0;
+
+try {
+  const result = await WAX.transact(
+    {
+        actions: [
+          {
+            account: NESTCONTRACT,
+            name: 'createprize',
+            authorization: [{
+              actor: author,
+              permission: 'active',
+            }],
+            data: {
+              boardid: boardid,
+              mode: 0,
+              values: ""
+            },
+          }]
+         }, 
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+    });         
+} catch (error) {
+  console.log(error);
+}
+```
+##### Contract Sample
+```c++
+name NESTCONTRACT = name("nestplatform");
+uint64_t boardid = 0;
+
+//mode - prize paments mode: 0 - absolute numbers, 1 - percents
+//values - string with payments values for top users on nestplatform
+//vlues example - 100,50,40,
+action createLBoard = action(
+	permission_level{author, name("active")},
+	NESTCONTRACT,
+	name("createprize"),
+	std::make_tuple( boardid, 0, string(0))
+);
+createLBoard.send();	
+```
+----------------------------
+### Add user to leader board
+You can use leader board for storing data in JSON format about user like in example:
+-------------------------------
+##### JS Sample
+```js
+const NESTCONTRACT = "nestplatform";
+var boardid = 0;
+var username = "someusername";
+var points = 52012.0;
+//User data example
+var data = "{\"totalGames\":72,\"totalPoints\":42636,\"flippedTotalSquares\":92948,\"won2048\":0}";
+
+try {
+  const result = await WAX.transact(
+    {
+        actions: [
+          {
+            account: NESTCONTRACT,
+            name: 'update',
+            authorization: [{
+              actor: author,
+              permission: 'active',
+            }],
+            data: {
+              boardid: boardid,
+              username: username,
+              points: points,
+              data: data
+            },
+          }]
+         }, 
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+    });         
+} catch (error) {
+  console.log(error);
+}
+```
+##### Contract Sample
+```c++
+name NESTCONTRACT = name("nestplatform");
+uint64_t boardid = 0;
+name username = name("someusername");
+double points = 52012.0;
+//User data example
+string data = "{\"totalGames\":72,\"totalPoints\":42636,\"flippedTotalSquares\":92948,\"won2048\":0}";
+
+//mode - prize paments mode: 0 - absolute numbers, 1 - percents
+//values - string with payments values for top users on nestplatform
+//vlues example - 100,50,40,
+action updateLBoard = action(
+	permission_level{author, name("active")},
+	NESTCONTRACT,
+	name("update"),
+	std::make_tuple( boardid, username, points, data)
+);
+updateLBoard.send();	
+```
+------------------------------
+## Contract actions
+```bash
+#-- For game---
+gameregister            (name owner, string gameurl, vector<string> keywords, string description, 
+                        vector<string> screenshots, vector<string> videos, vector<string> promscrshots, 
+                        asset price, string releasedate, string data)
+
+gameupdate              (uint64 gameid, name new_owner, string gameurl, vector<string> keywords, 
+                        string description, vector<string> screenshots, vector<string> videos, 
+                        vector<string> promscrshots, asset price, string releasedate, string data)
     
-    TABLE lboard {
-      uint64_t                  id;                 //nestcontract id on table
-      eosio::name               owner;              //owner wax account name
-      string                    boardname;          //name of current board
-      uint64_t                  gameid;             //game's id
-      double                    pot;                //total pot on current nestcontract
-      vector<player_s>          players;            //array of players
-      prize_s                   prize;              //array and type of prizes
+#-- For leader board
+createlboard            (owner, boardname, gameid)
+createprize             (boardid, mode, value)
+resetlboard             (uint64_t boardid, bool resetpool)
+removelboard            (uint64_t boardid)
+update                  (uint64_t boardid, eosio::name username, double points, string data)
 
-      uint64_t primary_key() const { return id; }
-    };
+#-- For users
+usercreate              (name author,name username)
+userregister            (name username, string avatar, string nickname)
+userupdate              (name username, string avatar, string nickname)
+addfriend               (name username, name newfriend)
+deletefriend            (name username, name delfriend)
+applyfriend             (name username, name newfriend)
+    
+#-- For achievements
+achievcreate            (name owner, uint64_t gameid, string achievname, uint64_t xp, string description, 
+                        string image, string rarity)
+achievdelete            (uint64_t achieveid)
+achievearn              (name username, uint64_t achieveid)
 
-    TABLE game
-    {
-      uint64_t                  id{0};              //game id on games table
-      eosio::name               owner;              //owner WAX account
-      std::string               gameurl;            //game URL
-      std::vector<std::string>  keywords;           //array of game keywords
-      std::string               description;        //game description
-      std::vector<std::string>  screenshots;        //array of game screenshots URLs 
-      std::vector<std::string>  videos;             //array of game videos URLs 
-      std::vector<std::string>  promscrshots;       //array of promotional screenshots URLs 
-      eosio::asset              price;              //game price on WAX
-      std::vector<std::string>  customtitles;       //array of user's custom titles
-      std::vector<uint64_t>     achievements;       //array of achievements' IDs on TABLE achievements
-      std::vector<uint64_t>     badges;             //array of badges' IDs on TAVLE badges
-      std::string               realisedate;        //realise date on string format
-      std::string               data;               //game data on JSON format
+#-- For cards
+cardcreate              (name owner, uint64_t gameid, string cardname, string enableimg, 
+                        string disableimg, string series)
+carddelete              (uint64_t cardid)
+carddrop                (uint64_t cardid, name username)
 
-      uint64_t primary_key() const {return id;}
-    };
-
-    TABLE apprgame
-    {
-      uint64_t                  id{0};              //game id on games table
-      eosio::name               owner;              //owner WAX account
-      std::string               gameurl;            //game URL
-      std::vector<std::string>  keywords;           //array of game keywords
-      std::string               description;        //game description
-      std::vector<std::string>  screenshots;        //array of game screenshots URLs 
-      std::vector<std::string>  videos;             //array of game videos URLs 
-      std::vector<std::string>  promscrshots;       //array of promotional screenshots URLs 
-      eosio::asset              price;              //game price on WAX
-      std::vector<std::string>  customtitles;       //array of user's custom titles
-      std::vector<uint64_t>     achievements;       //array of achievements' IDs on TABLE achievements
-      std::vector<uint64_t>     badges;             //array of badges' IDs on TAVLE badges
-      std::string               realisedate;        //realise date on string format
-      std::string               data;               //game data on JSON format
-
-      uint64_t primary_key() const {return id;}
-    };
-
-    TABLE user
-    {
-      eosio::name               account;            //user's WAX account
-      std::string               nickname;           //user's nickname
-      std::string               avatar;             //user's avatar URL
-      uint64_t                  level{0};           //current user's level
-      uint64_t                  xp{0};              //current user's points
-      std::vector<achiev_s>     achievements;       //array of user's achievements
-      std::vector<eosio::name>  friends;            //array of user's friends(WAX accounts)
-
-      uint64_t primary_key() const {return account.value;}
-    };
-
-    TABLE appruser
-    {
-      eosio::name               account;            //user's WAX account
-      std::string               nickname;           //user's nickname
-      std::string               avatar;             //user's avatar URL
-
-      uint64_t primary_key() const {return account.value;}
-    };
-
-    TABLE achievement
-    {
-      uint64_t                  id{0};              //achievement's id
-      uint64_t                  gameid{0};          //card's owner game id
-      std::string               achievname;         //achievement's name
-      std::string               description;        //achievement's description
-      std::string               image;              //achievement's image URL
-      std::string               rarity;             //achievement's rarity
+#For badges
+badgecreate             (name owner, uint64_t gameid, string badgename, vector<uint64_t> cardids)
+badgedelete             (uint64_t badgeid)
+badgeearn               (name username, uint64_t badgeid)
+```
+--------------------
+# Data Structures
+### Games
+```c++
+gametbl {
+      uint64_t                  id;                 //game id on games table
+      name                      owner;              //owner WAX account
+      string                    gameurl;            //game URL
+      vector<string>            keywords;           //array of game keywords
+      string                    description;        //game description
+      vector<string>            screenshots;        //array of game screenshots URLs 
+      vector<string>            videos;             //array of game videos URLs 
+      vector<string>            promscrshots;       //array of promotional screenshots URLs 
+      asset                     price;              //game price on WAX
+      vector<string>            customtitles;       //array of users custom titles
+      vector<uint64_t>          achievements;       //array of achievements IDs on TABLE achievements
+      vector<uint64_t>          badges;             //array of badges IDs on TAVLE badges
+      string                    releasedate;        //realise date on string format
+      string                    data;               //game data on JSON format
+    }
+```
+### Users
+```c++
+user{
+      name                      account;            //user's WAX account
+      string                    nickname;           //user's nickname
+      string                    avatar;             //user's avarat URL
+      uint64_t                  level;              //current user's level
+      uint64_t                  xp;                 //current user's points
+      vector<achiev_s>          achievements;       //array of user's achievements
+      vector<name>              friends;            //array of user's friends(WAX accounts)
+    }
+```
+### Achievements
+```c++
+achiev{
+      uint64_t                  id;                 //achievement's id on TABLE
+      uint64_t                  gameid;             //card's owner game id
+      string                    achievname;         //achievement's name
+      string                    description;        //achievement's description
+      string                    image;              //achievement's image URL
+      uint64_t                  xp;                 //achievement's xp
+      string                    rarity;             //achievement's rarity
       bool                      candelete;          //achievement can be deleted only if nobody has it
-
-      uint64_t primary_key() const { return id;}
-    };
-
-    TABLE appracheiv
-    {
-      uint64_t                  id{0};              //achievement's id on TABLE
-      uint64_t                  gameid{0};          //card's owner game id
-      std::string               achievname;         //achievement's name
-      std::string               description;        //achievement's description
-      std::string               image;              //achievement's image URL
-      std::string               rarity;             //achievement's rarity
-
-      uint64_t primary_key() const { return id;}
-    };
-
-    TABLE card
-    {
-      uint64_t                  id{0};              //card's TABLE id
-      uint64_t                  gameid{0};          //card's owner game id
-      std::string               cardname;           //card's name
-      std::string               enableimg;          //card's enable image URL
-      std::string               disableimg;         //card's disable image URL
-      std::string               series;             //card's series name
-      bool                      candelete{1};       //card can be deleted only if nobody has it
-
-      uint64_t primary_key() const { return id;}
-    };    
-    
-    TABLE apprcard
-    {
-      uint64_t                  id{0};              //card's TABLE id
-      uint64_t                  gameid{0};          //card's owner id
-      std::string               cardname;           //card's name
-      std::string               enableimg;          //card's enable image URL
-      std::string               disableimg;         //card's disable image URL
-      std::string               series;             //card's series name
-
-      uint64_t primary_key() const { return id;}
-    };
-
-    TABLE badge
-    {
-      uint64_t                  id{0};              //badge TABLE id
-      uint64_t                  gameid{0};          //badge's owner id
-      std::string               badgename;          //badge's name
-      std::vector<uint64_t>     cardids;            //array of cards which includes on badge
-      bool                      candelete{1};       //badge can be deleted only if nobody has it
-
-      uint64_t primary_key() const { return id; }
-    };    
-    
-    TABLE apprbadge
-    {
-      uint64_t                  id{0};              //badge TABLE id
-      uint64_t                  gameid{0};          //badge's owner id
-      std::string               badgename;          //badge's name
-      std::vector<uint64_t>     cardids;            //array of cards which includes on badge
-
-      uint64_t primary_key() const { return id; }
-    };
-
-    TABLE level
-    {
-      uint64_t                  lvl{0};             //level number
-      uint64_t                  points{0};          //points to get level
-
-      uint64_t primary_key() const {return lvl;}
-    };
-
-    TABLE gamecard
-    {
-      uint64_t                  gameid{0};           //game id
-      std::vector<series_s>     series;              //array with card seria data
-
-      uint64_t primary_key() const {return gameid;}
-    };
-
-    TABLE usercard
-    {
-      eosio::name               username;             //user's wax account
-      std::vector<uint64_t>     cardids;              //array of owned cards' ids
-
-      uint64_t primary_key() const {return username.value;}
-    };
+    }
 ```
+### Cards
+```c++
+card {
+      uint64_t                  id;                 //card's TABLE id
+      uint64_t                  gameid;             //card's owner game id
+      string                    cardname;           //card's name
+      string                    enableimg;          //card's enable image URL
+      string                    disableimg;         //card's disable image URL
+      string                    series;             //card's series name
+      bool                      candelete;          //card can be deleted only if nobody has it
+    }
+``` 
+### Badges
+```c++
+badge {
+      uint64_t                  id;                 //badge TABLE id
+      uint64_t                  gameid;             //badge's owner id
+      string                    badgename;          //badge's name
+      vector<uint64_t>          cardids;            //array of cards which includes on badge
+      bool                      candelete;          //badge can be deleted only if nobody has it
 
-## Sample js calls
+```
+--------------------------
+# Example game: 2048
+##### https://nest.dapplica.io/2048 
+### Register game
+-----------------
+##### Contract Sample
+```c++
+name NESTCONTRACT = name("nestplatform");
 
-```JavaScript
-//register game
-async function register_game() {
-  try {
-    await globals.WAX.transaction({
-      actions: [
-        {
-          account: globals.NEST_CONTRACT,
-          name: "gameregister",
-          authorization: [
-            {
-              actor: globals.WAX_ACCOUNT,
-              permission: "active",
+name author = get_self();
+string game_url = "https://nest.dapplica.io/games/2048";
+vector<string> keywords[] = {"1024","2048","numbers"};
+string description = "It is a spinoff of popular 1024 game, but in this case you have to get 2048 in order to win the game";
+vector<string> empty_string_vector[] = {""};
+vector<string> empty_vector[];
+asset price = asset(0, eosio::symbol("WAX", 8));
+string releasedate = "10 September 2020";
+
+action createGame = action(
+	permission_level{author, name("active")},
+	NESTCONTRACT,
+	name("gameregister"),
+	std::make_tuple( author, game_url, keywords, description, empty_string_vector, empty_string_vector, empty_string_vector, price, releasedate, string(""))
+);
+createGame.send();	
+```
+##### JS Sample
+```js
+const NESTCONTRACT = "nestplatform";
+const author = "nestgameshub";
+var game_url = "https://nest.dapplica.io/games/2048";
+var keywords = ["1024","2048","numbers"];
+var description = "It is a spinoff of popular 1024 game, but in this case you have to get 2048 in order to win the game";
+var price = "0.00000000 WAX";
+var releasedate = "10 September 2020";
+
+try {
+  const result = await WAX.transact(
+    {
+        actions: [
+          {
+            account: NESTCONTRACT,
+            name: 'gameregister',
+            authorization: [{
+              actor: author,
+              permission: 'active',
+            }],
+            data: {
+              owner: author,
+              gameurl: game_url,
+              keywords: keywords,
+              description: description,
+              screenshots: [""],
+              videos: [""],
+              promscrshots: [],
+              price: price,
+              releasedata: releasedata,
+              data: ""
             },
-          ],
-          data: {
-            owner: globals.WAX_ACCOUNT, //your WAX account
-            gameurl: "", //URL to your game site
-            keywords: ["", ""], //array of keywords
-            description: "", //game's description
-            screenshots: [""], //array of URLs with game screenshots(at least 1)
-            videos: [""], //array of URLs with game videos(can be empty)
-            promscrshots: [""], //array of URLs with game promotional(can be empty)
-            price: "0 WAX", //Game's price
-            realisedate: "10 october 2123", //Release date
-            data: "{}", //Another data on JSON-format
-          },
-        },
-      ],
-    });
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-//####################################################################################
-//##      Achievements functions
-//####################################################################################
-
-//create achievement
-async function create_achievement() {
-  try {
-    await globals.WAX.transaction({
-      actions: [
+          }]
+         }, 
         {
-          account: globals.NEST_CONTRACT,
-          name: "achievcreate",
-          authorization: [
-            {
-              actor: globals.WAX_ACCOUNT,
-              permission: "active",
-            },
-          ],
-          data: {
-            owner: globals.WAX_ACCOUNT, //Your WAX account
-            gameid: 0, //Your game's id
-            achievname: "", //Achievement name
-            description: "", //Description of achievement
-            image: "", //URL to achievement's image
-            rarity: "", //Achievement's rarity
-          },
-        },
-      ],
-    });
-  } catch (error) {
-    console.log(error);
-  }
+          blocksBehind: 3,
+          expireSeconds: 30,
+    });         
+} catch (error) {
+  console.log(error);
 }
 ```
+-------------------------------
+### Create achievement
+-------------------------------
+##### Contract Sample
+```c++
+name NESTCONTRACT = name("nestplatform");
+
+name author = get_self();
+string game_url = "https://nest.dapplica.io/games/2048";
+uint64_t gameid = 3;
+string achiev_name = "Played total 1 game";
+string description = "Played total one 2048 game round";
+string image = "https://nest.dapplica.io/games/2048/images/achievement1.png";
+uint64_t xp = 40;
+string rarity = "Common";
+
+action createAchieve = action(
+	permission_level{author, name("active")},
+	NESTCONTRACT,
+	name("achievcreate"),
+	std::make_tuple( author, gameid, achiev_name, xp, description, image, rarity)
+);
+createAchieve.send();	
+```
+##### JS Sample
+```js
+const NESTCONTRACT = "nestplatform";
+const author = "nestgameshub";
+var game_url = "https://nest.dapplica.io/games/2048";
+var gameid = 3;
+var achiev_name = "Played total 1 game";
+var description = "Played total one 2048 game round";
+var image = "https://nest.dapplica.io/games/2048/images/achievement1.png";
+var xp = 40;
+var rarity = "Common";
+
+try {
+  const result = await WAX.transact(
+    {
+        actions: [
+          {
+            account: NESTCONTRACT,
+            name: 'achievcreate',
+            authorization: [{
+              actor: author,
+              permission: 'active',
+            }],
+            data: {
+              owner: author,
+              gameid: gameid,
+              achievname: achiev_name,
+              xp: xp,
+              description: description,
+              image: image,
+              rarity: rarity
+            },
+          }]
+         }, 
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+    });         
+} catch (error) {
+  console.log(error);
+}
+```
+-------------------------------
+### Create leader board
+-------------------------------
+##### Contract Sample
+```c++
+name NESTCONTRACT = name("nestplatform");
+
+name author = get_self();
+string boardname = "General";
+uint64_t gameid = 3;
+
+action createLBoard = action(
+	permission_level{author, name("active")},
+	NESTCONTRACT,
+	name("createlboard"),
+	std::make_tuple( author, boardname, gameid)
+);
+createLBoard.send();	
+```
+##### JS Sample
+```js
+const NESTCONTRACT = "nestplatform";
+const author = "nestgameshub";
+var boardname = "General";
+var gameid = 3;
+
+try {
+  const result = await WAX.transact(
+    {
+        actions: [
+          {
+            account: NESTCONTRACT,
+            name: 'createlboard',
+            authorization: [{
+              actor: author,
+              permission: 'active',
+            }],
+            data: {
+              owner: author,
+              boardname: boardname,
+              gameid: gameid
+            },
+          }]
+         }, 
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+    });         
+} catch (error) {
+  console.log(error);
+}
+```
+----------------------------
+### Create leader board prize
+-------------------------------
+##### Contract Sample
+```c++
+name NESTCONTRACT = name("nestplatform");
+uint64_t boardid = 0;
+
+//mode - prize paments mode: 0 - absolute numbers, 1 - percents
+//values - string with payments values for top users on nestplatform
+//vlues example - 100,50,40,
+action createLBoard = action(
+	permission_level{author, name("active")},
+	NESTCONTRACT,
+	name("createprize"),
+	std::make_tuple( boardid, 0, string(0))
+);
+createLBoard.send();	
+```
+##### JS Sample
+```js
+const NESTCONTRACT = "nestplatform";
+var boardid = 0;
+
+try {
+  const result = await WAX.transact(
+    {
+        actions: [
+          {
+            account: NESTCONTRACT,
+            name: 'createprize',
+            authorization: [{
+              actor: author,
+              permission: 'active',
+            }],
+            data: {
+              boardid: boardid,
+              mode: 0,
+              values: ""
+            },
+          }]
+         }, 
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+    });         
+} catch (error) {
+  console.log(error);
+}
+```
+----------------------------
+### Add user to leader board
+You can use leader board for storing data in JSON format about user like in example:
+-------------------------------
+##### Contract Sample
+```c++
+name NESTCONTRACT = name("nestplatform");
+uint64_t boardid = 0;
+name username = name("someusername");
+double points = 52012.0;
+//User data example
+string data = "{\"totalGames\":72,\"totalPoints\":42636,\"flippedTotalSquares\":92948,\"won2048\":0}";
+
+//mode - prize paments mode: 0 - absolute numbers, 1 - percents
+//values - string with payments values for top users on nestplatform
+//vlues example - 100,50,40,
+action updateLBoard = action(
+	permission_level{author, name("active")},
+	NESTCONTRACT,
+	name("update"),
+	std::make_tuple( boardid, username, points, data)
+);
+updateLBoard.send();	
+```
+##### JS Sample
+```js
+const NESTCONTRACT = "nestplatform";
+var boardid = 0;
+var username = "someusername";
+var points = 52012.0;
+//User data example
+var data = "{\"totalGames\":72,\"totalPoints\":42636,\"flippedTotalSquares\":92948,\"won2048\":0}";
+
+try {
+  const result = await WAX.transact(
+    {
+        actions: [
+          {
+            account: NESTCONTRACT,
+            name: 'update',
+            authorization: [{
+              actor: author,
+              permission: 'active',
+            }],
+            data: {
+              boardid: boardid,
+              username: username,
+              points: points,
+              data: data
+            },
+          }]
+         }, 
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+    });         
+} catch (error) {
+  console.log(error);
+}
+```
+
+ 
