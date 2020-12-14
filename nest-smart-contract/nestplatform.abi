@@ -556,6 +556,20 @@
             ]
         },
         {
+            "name": "changebpoint",
+            "base": "",
+            "fields": [
+                {
+                    "name": "boardid",
+                    "type": "uint64"
+                },
+                {
+                    "name": "startpoints",
+                    "type": "float64"
+                }
+            ]
+        },
+        {
             "name": "createlboard",
             "base": "",
             "fields": [
@@ -570,6 +584,10 @@
                 {
                     "name": "gameid",
                     "type": "uint64"
+                },
+                {
+                    "name": "startpoints",
+                    "type": "float64"
                 }
             ]
         },
@@ -1046,6 +1064,20 @@
             ]
         },
         {
+            "name": "startlpoint",
+            "base": "",
+            "fields": [
+                {
+                    "name": "boardid",
+                    "type": "uint64"
+                },
+                {
+                    "name": "startpoints",
+                    "type": "float64"
+                }
+            ]
+        },
+        {
             "name": "startround",
             "base": "",
             "fields": [
@@ -1285,6 +1317,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "changebpoint",
+            "type": "changebpoint",
+            "ricardian_contract": ""
+        },
+        {
             "name": "createlboard",
             "type": "createlboard",
             "ricardian_contract": ""
@@ -1489,6 +1526,13 @@
         {
             "name": "rategames",
             "type": "rategame",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "startlpoints",
+            "type": "startlpoint",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
