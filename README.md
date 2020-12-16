@@ -146,6 +146,11 @@ const NESTCONTRACT = "nestplatform";
 const author = "nestgameshub";
 var boardname = "General";
 var gameid = 3;
+//if you want that your leaderbord records starts from some value
+//add it in field "startpoints"
+//else write in this field 0.0
+ 
+var startpoints = 0.0;
 
 try {
   const result = await WAX.transact(
@@ -161,7 +166,8 @@ try {
             data: {
               owner: author,
               boardname: boardname,
-              gameid: gameid
+              gameid: gameid,
+	      startpoints: startpoints,
             },
           }]
          }, 
@@ -180,12 +186,13 @@ name NESTCONTRACT = name("nestplatform");
 name author = get_self();
 string boardname = "General";
 uint64_t gameid = 3;
+double startpoints = 0.0;
 
 action createLBoard = action(
 	permission_level{author, name("active")},
 	NESTCONTRACT,
 	name("createlboard"),
-	std::make_tuple( author, boardname, gameid)
+	std::make_tuple( author, boardname, gameid, startpoints)
 );
 createLBoard.send();	
 ```
@@ -317,6 +324,7 @@ createprize             (boardid, mode, value)
 resetlboard             (uint64_t boardid, bool resetpool)
 removelboard            (uint64_t boardid)
 update                  (uint64_t boardid, eosio::name username, double points, string data)
+changebpoint		(uint64_t boardid, double startpoints)
 
 #-- For users
 usercreate              (name author,name username)
@@ -587,6 +595,108 @@ try {
               owner: author,
               boardname: boardname,
               gameid: gameid
+            },
+          }]
+         }, 
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+    });         
+} catch (error) {
+  console.log(error);
+}
+```-------------------------------
+### Create leader board
+-------------------------------
+##### Contract Sample
+```c++
+name NESTCONTRACT = name("nestplatform");
+
+name author = get_self();
+string boardname = "General";
+uint64_t gameid = 3;
+
+action createLBoard = action(
+	permission_level{author, name("active")},
+	NESTCONTRACT,
+	name("createlboard"),
+	std::make_tuple( author, boardname, gameid)
+);
+createLBoard.send();	
+```
+##### JS Sample
+```js
+const NESTCONTRACT = "nestplatform";
+const author = "nestgameshub";
+var boardname = "General";
+var gameid = 3;
+
+try {
+  const result = await WAX.transact(
+    {
+        actions: [
+          {
+            account: NESTCONTRACT,
+            name: 'createlboard',
+            authorization: [{
+              actor: author,
+              permission: 'active',
+            }],
+            data: {
+              owner: author,
+              boardname: boardname,
+              gameid: gameid
+            },
+          }]
+         }, 
+        {
+          blocksBehind: 3,
+          expireSeconds: 30,
+    });         
+} catch (error) {
+  console.log(error);
+}
+```
+-------------------------------
+### Set/change leader board start record points
+-------------------------------
+##### Contract Sample
+```c++
+name NESTCONTRACT = name("nestplatform");
+
+name author = get_self();
+uint64_t boardid = 0;
+double startpoints = 100.0;
+
+action setLBoardPoints = action(
+	permission_level{author, name("active")},
+	NESTCONTRACT,
+	name("changebpoint"),
+	std::make_tuple( boardid, startpoints)
+);
+setLBoardPoints.send();	
+```
+##### JS Sample
+```js
+const NESTCONTRACT = "nestplatform";
+const author = "nestgameshub";
+var boardid = 0;
+var startpoints = 100.0;
+
+try {
+  const result = await WAX.transact(
+    {
+        actions: [
+          {
+            account: NESTCONTRACT,
+            name: 'changebpoint',
+            authorization: [{
+              actor: author,
+              permission: 'active',
+            }],
+            data: {
+              boaridid: boaridid,
+              startpoints: startpoints,
             },
           }]
          }, 
