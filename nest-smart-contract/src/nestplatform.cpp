@@ -1,5 +1,4 @@
 #include <nestplatform.hpp>
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //        nestplatform ACTIONS
@@ -18,6 +17,8 @@ void nestplatform::createlboard(eosio::name owner, string boardname, uint64_t ga
     eosio::check(game_itr != _games.end(), "Game with current id doesn't exist");
 
     require_auth(game_itr->owner);
+
+
 
     lboards _lb(CONTRACTN, CONTRACTN.value);
 
@@ -42,13 +43,13 @@ void nestplatform::createlboard(eosio::name owner, string boardname, uint64_t ga
         new_board.gameid = gameid;
     });
 
-    if (startpoints != 0.0)
+    if(startpoints != 0.0)
     {
         startlpoints _startpoints(CONTRACTN, CONTRACTN.value);
         auto points_itr = _startpoints.find(boardid);
-        eosio::check(points_itr == _startpoints.end(), "Points for this board exists.");
-
-        _startpoints.emplace(CONTRACTN, [&](auto &new_points) {
+        eosio::check(points_itr == _startpoints.end(),"Points for this board exists.");
+        
+        _startpoints.emplace(CONTRACTN, [&](auto& new_points){
             new_points.boardid = boardid;
             new_points.startpoints = startpoints;
         });
@@ -57,6 +58,7 @@ void nestplatform::createlboard(eosio::name owner, string boardname, uint64_t ga
 
 void nestplatform::changebpoint(uint64_t boardid, double startpoints)
 {
+
     lboards _lb(CONTRACTN, CONTRACTN.value);
 
     auto lb_itr = _lb.find(boardid);
@@ -66,16 +68,16 @@ void nestplatform::changebpoint(uint64_t boardid, double startpoints)
 
     startlpoints _startpoints(CONTRACTN, CONTRACTN.value);
     auto points_itr = _startpoints.find(boardid);
-    if (points_itr == _startpoints.end())
-    {
-        _startpoints.emplace(CONTRACTN, [&](auto &new_points) {
+    if(points_itr == _startpoints.end())
+    {    
+        _startpoints.emplace(CONTRACTN, [&](auto& new_points){
             new_points.boardid = boardid;
             new_points.startpoints = startpoints;
         });
     }
     else
     {
-        _startpoints.modify(points_itr, CONTRACTN, [&](auto &mod_points) {
+        _startpoints.modify(points_itr, CONTRACTN, [&](auto& mod_points){
             mod_points.startpoints = startpoints;
         });
     }
@@ -90,6 +92,7 @@ void nestplatform::changebpoint(uint64_t boardid, double startpoints)
 //
 void nestplatform::createprize(uint64_t boardid, uint8_t mode, string values)
 {
+
     lboards _lb(CONTRACTN, CONTRACTN.value);
 
     auto lb_itr = _lb.find(boardid);
@@ -174,8 +177,8 @@ void nestplatform::update(uint64_t boardid, eosio::name username, double points,
 
     startlpoints _startpoints(CONTRACTN, CONTRACTN.value);
     auto points_itr = _startpoints.find(boardid);
-    if (points_itr != _startpoints.end())
-        totalpoints = points_itr->startpoints;
+    if(points_itr != _startpoints.end())
+    totalpoints = points_itr->startpoints;
 
     uint64_t pos = finder(lb_itr->players, username);
     if (pos == -1)
@@ -185,7 +188,7 @@ void nestplatform::update(uint64_t boardid, eosio::name username, double points,
         _lb.modify(lb_itr, get_self(), [&](auto &mod_board) {
             mod_board.players.push_back({
                 username,
-                (points + totalpoints),
+                (points+totalpoints),
                 data,
             });
             while (pos != 0)
@@ -268,7 +271,7 @@ ACTION nestplatform::gameupdate(uint64_t gameid, eosio::name new_owner, std::str
     auto game_itr = _games.find(gameid);
     eosio::check(game_itr != _games.end(), "Game with current id doesn't exist");
 
-    require_auth(game_itr->owner);
+    (has_auth(game_itr->owner)) ? require_auth(game_itr->owner) : require_auth(CONTRACTN);
 
     std::vector<std::string> help_array;
 
@@ -276,75 +279,116 @@ ACTION nestplatform::gameupdate(uint64_t gameid, eosio::name new_owner, std::str
     {
         _apprgames.emplace(CONTRACTN, [&](auto &new_game) {
             new_game.id = gameid;
-            if (game_itr->owner != new_owner && !new_owner.to_string().empty())
+            if(game_itr->owner != new_owner && !new_owner.to_string().empty())
                 new_game.owner = new_owner;
-            if (game_itr->gameurl != gameurl)
+            else
+                new_game.owner = game_itr->owner;
+            if(game_itr->gameurl != gameurl)
                 new_game.gameurl = gameurl;
-            if (!keywords.empty())
+            else
+                new_game.gameurl = game_itr->gameurl;
+            if(!keywords.empty())
                 new_game.keywords = keywords;
-            if (game_itr->description != description && !description.empty())
+            else
+                new_game.keywords = game_itr->keywords;
+            if(game_itr->description != description && !description.empty())
                 new_game.description = description;
-            if (!screenshots.empty())
+            else
+                new_game.description = game_itr->description;
+            if(!screenshots.empty())
             {
                 help_array = game_itr->screenshots;
                 help_array.assign(screenshots.begin(), screenshots.end());
                 new_game.screenshots = help_array;
             }
-            if (!videos.empty())
+            else
+                new_game.screenshots = game_itr->screenshots;
+            if(!videos.empty())
             {
                 help_array = game_itr->videos;
                 help_array.assign(videos.begin(), videos.end());
-                new_game.videos = help_array;
+                new_game.videos= help_array;
             }
-            if (!promscrshots.empty())
+            else
+                new_game.videos = game_itr->videos;
+            if(!promscrshots.empty())
             {
                 help_array = game_itr->promscrshots;
                 help_array.assign(promscrshots.begin(), promscrshots.end());
                 new_game.promscrshots = help_array;
             }
-            if (game_itr->price != price)
+            else
+                new_game.promscrshots = game_itr->promscrshots;
+            if(game_itr->price.amount != price.amount)
                 new_game.price = price;
-            if (game_itr->releasedate != releasedate && !releasedate.empty())
+            else
+                new_game.price = game_itr->price;
+            if(game_itr->releasedate != releasedate && !releasedate.empty())
                 new_game.releasedate = releasedate;
-            if (game_itr->data != data && !data.empty())
+            else
+                new_game.releasedate = game_itr->releasedate;
+            if(game_itr->data != data && !data.empty())
                 new_game.data = data;
+            else
+                new_game.data = game_itr->data;
         });
     }
     else
     {
-        _apprgames.modify(app_itr, CONTRACTN, [&](auto &mod_game) {
-            if (mod_game.owner != new_owner && !new_owner.to_string().empty())
-                mod_game.owner = new_owner;
-            if (mod_game.gameurl != gameurl)
-                mod_game.gameurl = gameurl;
-            if (!keywords.empty())
-                mod_game.keywords = keywords;
-            if (mod_game.description != description && !description.empty())
-                mod_game.description = description;
-            if (!screenshots.empty())
+        _apprgames.modify(app_itr, CONTRACTN, [&](auto &new_game) {
+            new_game.id = gameid;
+            if(game_itr->owner != new_owner && !new_owner.to_string().empty())
+                new_game.owner = new_owner;
+            else
+                new_game.owner = game_itr->owner;
+            if(game_itr->gameurl != gameurl)
+                new_game.gameurl = gameurl;
+            else
+                new_game.gameurl = game_itr->gameurl;
+            if(!keywords.empty())
+                new_game.keywords = keywords;
+            else
+                new_game.keywords = game_itr->keywords;
+            if(game_itr->description != description && !description.empty())
+                new_game.description = description;
+            else
+                new_game.description = game_itr->description;
+            if(!screenshots.empty())
             {
                 help_array = game_itr->screenshots;
                 help_array.assign(screenshots.begin(), screenshots.end());
-                mod_game.screenshots = help_array;
+                new_game.screenshots = help_array;
             }
-            if (!videos.empty())
+            else
+                new_game.screenshots = game_itr->screenshots;
+            if(!videos.empty())
             {
                 help_array = game_itr->videos;
                 help_array.assign(videos.begin(), videos.end());
-                mod_game.videos = help_array;
+                new_game.videos= help_array;
             }
-            if (!promscrshots.empty())
+            else
+                new_game.videos = game_itr->videos;
+            if(!promscrshots.empty())
             {
                 help_array = game_itr->promscrshots;
                 help_array.assign(promscrshots.begin(), promscrshots.end());
-                mod_game.promscrshots = help_array;
+                new_game.promscrshots = help_array;
             }
-            if (mod_game.price != price)
-                mod_game.price = price;
-            if (mod_game.releasedate != releasedate && !releasedate.empty())
-                mod_game.releasedate = releasedate;
-            if (mod_game.data != data && !data.empty())
-                mod_game.data = data;
+            else
+                new_game.promscrshots = game_itr->promscrshots;
+            if(game_itr->price.amount != price.amount)
+                new_game.price = price;
+            else
+                new_game.price = game_itr->price;
+            if(game_itr->releasedate != releasedate && !releasedate.empty())
+                new_game.releasedate = releasedate;
+            else
+                new_game.releasedate = game_itr->releasedate;
+            if(game_itr->data != data && !data.empty())
+                new_game.data = data;
+            else
+                new_game.data = game_itr->data;
         });
     }
 }
@@ -396,6 +440,73 @@ ACTION nestplatform::gameapprove(uint64_t appgameid, bool approve)
     _apprgames.erase(app_itr);
 }
 
+
+ACTION nestplatform::gamerate(eosio::name username, uint64_t gameid, double rate, std::string comment)
+{
+    require_auth(username);
+
+    comentapprs _comentaproves(CONTRACTN, CONTRACTN.value);
+
+    uint64_t id = 0;
+
+    auto rate_itr = _comentaproves.end();
+    if(rate_itr != _comentaproves.begin())
+    {
+        rate_itr--;
+        id = rate_itr->id;
+    }
+    id++;
+
+    _comentaproves.emplace(CONTRACTN, [&](auto& new_rate){
+        new_rate.id = id;
+        new_rate.gameid = gameid;
+        new_rate.username = username;
+        new_rate.rate = rate;
+        new_rate.comment = comment;
+    });
+}
+
+ACTION nestplatform::apprcomment(uint64_t id, bool accept)
+{
+    require_auth(CONTRACTN);
+
+
+    comentapprs _comentaproves(CONTRACTN, CONTRACTN.value);
+    auto appr_itr = _comentaproves.find(id);
+    eosio::check(appr_itr != _comentaproves.end(),"Record was created.");
+
+    if(accept)
+    {
+        rategames _rategames(CONTRACTN, CONTRACTN.value);
+        auto rate_itr = _rategames.find(appr_itr->gameid);
+        
+        if(rate_itr != _rategames.end())
+        {
+            _rategames.modify(rate_itr, CONTRACTN, [&](auto& mod_rate){
+                mod_rate.totalstars += appr_itr->rate;
+                mod_rate.totalvotes++;
+                mod_rate.rate = (double)(mod_rate.totalstars / mod_rate.totalvotes);
+                mod_rate.records.push_back({appr_itr->username,appr_itr->rate, appr_itr->comment});
+            });
+        }
+        else
+        {
+            _rategames.emplace(CONTRACTN, [&](auto& new_record){
+                new_record.gameid = appr_itr->gameid;
+                new_record.totalstars = appr_itr->rate;
+                new_record.totalvotes = 1;
+                new_record.rate = appr_itr->rate;
+                new_record.records.push_back({appr_itr->username,appr_itr->rate, appr_itr->comment});
+            });
+        }
+
+
+    }
+    
+    _comentaproves.erase(appr_itr);
+}
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //        USER ACTIONS
@@ -408,7 +519,7 @@ ACTION nestplatform::usercreate(eosio::name author, eosio::name username)
 
     users _users(CONTRACTN, CONTRACTN.value);
     auto user_itr = _users.find(username.value);
-    if (user_itr == _users.end())
+    if(user_itr == _users.end())
     {
         _users.emplace(CONTRACTN, [&](auto &new_user) {
             new_user.account = username;
@@ -416,7 +527,7 @@ ACTION nestplatform::usercreate(eosio::name author, eosio::name username)
     }
 }
 
-ACTION nestplatform::userregister(eosio::name username, std::string avatar, std::string nickname)
+ACTION nestplatform::userregister(eosio::name username, std::string avatar, std::string nickname, eosio::name referrer)
 {
     require_auth(username);
 
@@ -437,6 +548,59 @@ ACTION nestplatform::userregister(eosio::name username, std::string avatar, std:
         new_user.avatar = avatar;
         new_user.nickname = nickname;
     });
+
+    eosio::action addRef = eosio::action(
+            eosio::permission_level{CONTRACTN, eosio::name("active")},
+            CONTRACTN,
+            eosio::name("addreferral"),
+            std::make_tuple(referrer, username));
+        addRef.send();
+}
+
+ACTION nestplatform::addreferral(eosio::name referrer, eosio::name referee)
+{
+    if(eosio::has_auth(referrer))
+    {
+        require_auth(referrer);
+    }
+    else
+    {
+        require_auth(CONTRACTN);    
+    }
+    
+    referrals _refs(CONTRACTN,CONTRACTN.value);
+    auto referrer_itr = _refs.find(referrer.value);
+    auto referee_itr = _refs.find(referee.value);
+
+    if (referrer_itr != _refs.end())
+    {
+        _refs.modify(referrer_itr, CONTRACTN, [&](auto& mod_record){
+            mod_record.referee.push_back(referee);
+        });
+    }
+    else
+    {
+        _refs.emplace(CONTRACTN, [&](auto& new_record){
+            new_record.account = referrer;
+            new_record.referee = {referee};
+        });
+    }
+    
+    
+    if (referee_itr != _refs.end())
+    {
+        _refs.modify(referee_itr, CONTRACTN, [&](auto& mod_record){
+            mod_record.referrer = referrer;
+        });
+    }
+    else
+    {
+        _refs.emplace(CONTRACTN, [&](auto& new_record){
+            new_record.account = referee;
+            new_record.referrer = referrer;
+        });
+    }
+    
 }
 
 ACTION nestplatform::userupdate(eosio::name username, std::string avatar, std::string nickname)
@@ -453,18 +617,18 @@ ACTION nestplatform::userupdate(eosio::name username, std::string avatar, std::s
     {
         _apprusers.emplace(CONTRACTN, [&](auto &new_appu) {
             new_appu.account = username;
-            if (user_itr->avatar != avatar && !avatar.empty())
+            if(user_itr->avatar != avatar && !avatar.empty())
                 new_appu.avatar = avatar;
-            if (user_itr->nickname != nickname && !nickname.empty())
+            if(user_itr->nickname != nickname && !nickname.empty())
                 new_appu.nickname = nickname;
         });
     }
     else
     {
         _apprusers.modify(appuser_itr, CONTRACTN, [&](auto &mod_appu) {
-            if (mod_appu.avatar != avatar && !avatar.empty())
+            if(mod_appu.avatar != avatar && !avatar.empty())
                 mod_appu.avatar = avatar;
-            if (mod_appu.nickname != nickname && !nickname.empty())
+            if(mod_appu.nickname != nickname && !nickname.empty())
                 mod_appu.nickname = nickname;
         });
     }
@@ -506,7 +670,7 @@ ACTION nestplatform::addfriend(eosio::name username, eosio::name newfriend)
 {
     require_auth(username);
 
-    eosio::check(is_account(newfriend), "Friend account doesn't exist on WAX");
+    eosio::check(is_account(newfriend),"Friend account doesn't exist on WAX");
 
     users _users(CONTRACTN, CONTRACTN.value);
     auto user_itr = _users.find(username.value);
@@ -519,11 +683,11 @@ ACTION nestplatform::addfriend(eosio::name username, eosio::name newfriend)
     int friend_pos = finder(user_itr->friends, newfriend);
     eosio::check(friend_pos == -1, "User is on your friends' list");
 
-    friendapplys _friend(CONTRACTN, CONTRACTN.value);
+    friendapplys _friend(CONTRACTN,CONTRACTN.value);
     auto apply_itr = _friend.find(username.value);
-    if (apply_itr == _friend.end())
+    if(apply_itr == _friend.end())
     {
-        _friend.emplace(CONTRACTN, [&](auto &new_apply) {
+        _friend.emplace(CONTRACTN, [&](auto& new_apply){
             new_apply.account = newfriend;
             new_apply.friends.push_back(username);
         });
@@ -563,15 +727,15 @@ ACTION nestplatform::applyfriend(eosio::name username, eosio::name newfriend)
     friend_pos = finder(baseuser_itr->friends, username);
     eosio::check(friend_pos == -1, "User is on your friends' list");
 
-    friendapplys _friend(CONTRACTN, CONTRACTN.value);
+    friendapplys _friend(CONTRACTN,CONTRACTN.value);
     auto friend_itr = _friend.find(username.value);
-    eosio::check(friend_itr != _friend.end(), "User hasn't friends to apply");
+    eosio::check(friend_itr != _friend.end(),"User hasn't friends to apply");
 
     int pos = finder(friend_itr->friends, newfriend);
-    eosio::check(pos != -1, "You haven't this friend");
+    eosio::check(pos != -1,"You haven't this friend");
 
-    _friend.modify(friend_itr, CONTRACTN, [&](auto &mod_record) {
-        mod_record.friends.erase(mod_record.friends.begin() + pos);
+    _friend.modify(friend_itr, CONTRACTN,[&](auto& mod_record){
+        mod_record.friends.erase(mod_record.friends.begin()+pos);
     });
 
     _users.modify(user_itr, CONTRACTN, [&](auto &mod_user) {
@@ -582,6 +746,7 @@ ACTION nestplatform::applyfriend(eosio::name username, eosio::name newfriend)
         mod_user.friends.push_back(newfriend);
     });
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -597,7 +762,7 @@ ACTION nestplatform::setupdrop(uint8_t maxdrops, uint8_t maxonseries)
     config.set(_cdrops, CONTRACTN);
 }
 
-ACTION nestplatform::cardcreate(eosio::name owner, uint64_t gameid, std::string cardname, std::string enableimg, std::string disableimg, std::string series)
+ACTION nestplatform::cardcreate(eosio::name owner, uint64_t gameid, std::string cardname, std::string enableimg, std::string disableimg, std::string series, eosio::name schema_name)
 {
     require_auth(owner);
 
@@ -606,12 +771,15 @@ ACTION nestplatform::cardcreate(eosio::name owner, uint64_t gameid, std::string 
     eosio::check(game_itr != _games.end(), "Game with current id doesn't exist.");
     eosio::check(game_itr->owner == owner, "You aren't the owner of current game.");
 
+
+
     apprcards _apprcards(CONTRACTN, CONTRACTN.value);
     _apprcards.emplace(CONTRACTN, [&](auto &new_card) {
         new_card.id = getcardid();
         new_card.gameid = gameid;
         new_card.cardname = cardname;
         new_card.enableimg = enableimg;
+        new_card.schema_name = schema_name;
         new_card.disableimg = disableimg;
         new_card.series = series;
     });
@@ -632,7 +800,7 @@ ACTION nestplatform::carddelete(uint64_t cardid)
     _cards.erase(card_itr);
 }
 
-ACTION nestplatform::carddrop(uint64_t cardid, eosio::name username)
+ACTION nestplatform::carddrop(uint64_t cardid, eosio::name username, uint8_t nftstandard)
 {
 
     cards _cards(CONTRACTN, CONTRACTN.value);
@@ -647,7 +815,7 @@ ACTION nestplatform::carddrop(uint64_t cardid, eosio::name username)
 
     users _users(CONTRACTN, CONTRACTN.value);
     auto user_itr = _users.find(username.value);
-    if (user_itr == _users.end())
+    if(user_itr == _users.end())
     {
         eosio::action createUser = eosio::action(
             eosio::permission_level{CONTRACTN, eosio::name("active")},
@@ -663,16 +831,16 @@ ACTION nestplatform::carddrop(uint64_t cardid, eosio::name username)
     {
         _usercards.emplace(CONTRACTN, [&](auto &new_record) {
             new_record.username = username;
-            new_record.cardids.push_back({cardid, 1});
+            new_record.cardids.push_back({cardid,1});
         });
     }
     else
     {
-        int card_vec_id = finder(usercard_itr->cardids, cardid);
+        int card_vec_id = finder(usercard_itr->cardids,cardid);
         _usercards.modify(usercard_itr, CONTRACTN, [&](auto &mod_record) {
-            if (card_vec_id == -1)
+            if(card_vec_id == -1)
             {
-                mod_record.cardids.push_back({cardid, 1});
+                mod_record.cardids.push_back({cardid,1});
             }
             else
             {
@@ -681,18 +849,35 @@ ACTION nestplatform::carddrop(uint64_t cardid, eosio::name username)
         });
     }
 
-    /*std::string idata = "{\"name\":\"" + card_itr->cardname + "\", \"gameid\":" + std::to_string(card_itr->gameid) + ", \"series\":\"" + card_itr->series + "\" }";
-    std::string mdata = "{\"img\": \"" + card_itr->enableimg + "\" }";
+    if(nftstandard == 1)
+    {
 
-    eosio::action createAsset = eosio::action(
-        eosio::permission_level{CONTRACTN, eosio::name("active")},
-        SIMPLEASSETSCONTRACT,
-        eosio::name("create"),
-        std::make_tuple(CONTRACTN, eosio::name("card"), game_itr->owner, idata, mdata, 0));
-    createAsset.send();*/
+        std::string idata = "{\"name\":\"" + card_itr->cardname + "\", \"gameid\":" + std::to_string(card_itr->gameid) + ", \"series\":\"" + card_itr->series + "\" }";
+        std::string mdata = "{\"img\": \"" + card_itr->enableimg + "\" }";
+
+        eosio::action createAsset = eosio::action(
+            eosio::permission_level{CONTRACTN, eosio::name("active")},
+            SIMPLEASSETSCONTRACT,
+            eosio::name("create"),
+            std::make_tuple(CONTRACTN, eosio::name("card"), game_itr->owner, idata, mdata, 0));
+        createAsset.send();
+    }
+    else if(nftstandard == 2)
+    {
+
+        ATTRIBUTE_MAP empty_atr = {};
+        std::vector<eosio::asset> nullvec{};
+        
+        eosio::action mintAsset = eosio::action(
+            eosio::permission_level{CONTRACTN, eosio::name("active")},
+            eosio::name("atomicassets"),
+            eosio::name("mintasset"),
+            std::make_tuple(CONTRACTN, CONTRACTN, card_itr->schema_name, card_itr->templateid, username, empty_atr, empty_atr, nullvec)
+        );
+    }
 }
 
-ACTION nestplatform::cardapprove(uint64_t cardid, bool approve)
+ACTION nestplatform::cardapprove(uint64_t cardid, bool approve, int32_t templateid)
 {
     require_auth(CONTRACTN);
 
@@ -711,6 +896,8 @@ ACTION nestplatform::cardapprove(uint64_t cardid, bool approve)
             new_card.cardname = apprcard_itr->cardname;
             new_card.enableimg = apprcard_itr->enableimg;
             new_card.disableimg = apprcard_itr->disableimg;
+            new_card.schema_name = apprcard_itr->schema_name;
+            new_card.templateid = templateid;
             new_card.series = apprcard_itr->series;
         });
 
@@ -922,13 +1109,13 @@ ACTION nestplatform::badgeearn(eosio::name username, uint64_t badgeid)
 
     users _users(CONTRACTN, CONTRACTN.value);
     auto user_itr = _users.find(username.value);
-    if (user_itr == _users.end())
+    if(user_itr == _users.end())
     {
         eosio::action createUser = eosio::action(
             eosio::permission_level{CONTRACTN, eosio::name("active")},
             CONTRACTN,
             eosio::name("usercreate"),
-            std::make_tuple(game_itr->owner, username));
+            std::make_tuple(game_itr->owner,username));
         createUser.send();
     }
 
@@ -949,11 +1136,11 @@ ACTION nestplatform::badgeearn(eosio::name username, uint64_t badgeid)
 
     eosio::check(is_badge == true, "User hasn't all cards from this badge.");
 
-    userbadges _userbadges(CONTRACTN, CONTRACTN.value);
+    userbadges _userbadges(CONTRACTN,CONTRACTN.value);
     auto badge_usr_itr = _userbadges.find(username.value);
-    if (badge_usr_itr == _userbadges.end())
+    if(badge_usr_itr == _userbadges.end())
     {
-        _userbadges.emplace(CONTRACTN, [&](auto &new_badge_rec) {
+        _userbadges.emplace(CONTRACTN,[&](auto& new_badge_rec){
             new_badge_rec.username = username;
             new_badge_rec.badge_id.push_back(badgeid);
         });
@@ -961,8 +1148,8 @@ ACTION nestplatform::badgeearn(eosio::name username, uint64_t badgeid)
     else
     {
         int badge_arr_id = finder(badge_usr_itr->badge_id, badgeid);
-        eosio::check(badge_arr_id == -1, "User had current badge.");
-        _userbadges.modify(badge_usr_itr, CONTRACTN, [&](auto &mod_badge_rec) {
+        eosio::check(badge_arr_id == -1,"User had current badge.");
+        _userbadges.modify(badge_usr_itr,CONTRACTN,[&](auto& mod_badge_rec){
             mod_badge_rec.badge_id.push_back(badgeid);
         });
     }
@@ -1048,13 +1235,13 @@ ACTION nestplatform::achievearn(eosio::name username, uint64_t achieveid)
 
     users _users(CONTRACTN, CONTRACTN.value);
     auto user_itr = _users.find(username.value);
-    if (user_itr == _users.end())
+    if(user_itr == _users.end())
     {
         eosio::action createUser = eosio::action(
             eosio::permission_level{CONTRACTN, eosio::name("active")},
             CONTRACTN,
             eosio::name("usercreate"),
-            std::make_tuple(game_itr->owner, username));
+            std::make_tuple(game_itr->owner,username));
         createUser.send();
     }
 
@@ -1133,10 +1320,11 @@ ACTION nestplatform::achievxp(uint64_t id, uint64_t xp)
     auto achiev_itr = _achievements.find(id);
     eosio::check(achiev_itr != _achievements.end(), "Achievement with current id exists.");
 
-    _achievements.modify(achiev_itr, CONTRACTN, [&](auto &mod_ach) {
+    _achievements.modify(achiev_itr, CONTRACTN, [&](auto& mod_ach){
         mod_ach.xp = xp;
     });
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //        OUR GAME FUNCTIONS
@@ -1153,13 +1341,13 @@ ACTION nestplatform::startround(eosio::name username, uint64_t gameid)
 
     users _users(CONTRACTN, CONTRACTN.value);
     auto user_itr = _users.find(username.value);
-    if (user_itr == _users.end())
+    if(user_itr == _users.end())
     {
         eosio::action createUser = eosio::action(
             eosio::permission_level{CONTRACTN, eosio::name("active")},
             CONTRACTN,
             eosio::name("usercreate"),
-            std::make_tuple(game_itr->owner, username));
+            std::make_tuple(game_itr->owner,username));
         createUser.send();
     }
 }
@@ -1302,7 +1490,14 @@ extern "C" void apply(uint64_t receiver, uint64_t code, uint64_t action)
     {
         switch (action)
         {
-            EOSIO_DISPATCH_HELPER(nestplatform, (createlboard)(createprize)(resetlboard)(removelboard)(update)(changebpoint)(gameregister)(gameupdate)(gameapprove)(usercreate)(userregister)(userupdate)(userapprove)(addfriend)(deletefriend)(achievcreate)(achievdelete)(achievearn)(achievapprove)(achievxp)(cardcreate)(carddelete)(carddrop)(cardapprove)(setupdrop)(badgecreate)(badgedelete)(badgeapprove)(badgeearn)(lvlcreate)(lvlupdate)(lvlearn)(lvladdxp)(startround))
+            EOSIO_DISPATCH_HELPER(nestplatform, (createlboard)(createprize)(resetlboard)(removelboard)(update)(changebpoint)
+                                                (gameregister)(gameupdate)(gameapprove)
+                                                (usercreate)(userregister)(userupdate)(userapprove)(addfriend)(deletefriend)
+                                                (achievcreate)(achievdelete)(achievearn)(achievapprove)(achievxp)
+                                                (cardcreate)(carddelete)(carddrop)(cardapprove)(setupdrop)
+                                                (badgecreate)(badgedelete)(badgeapprove)(badgeearn)
+                                                (lvlcreate)(lvlupdate)(lvlearn)(lvladdxp)
+                                                (startround)(apprcomment)(gamerate))
         }
     }
     else

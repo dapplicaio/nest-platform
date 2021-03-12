@@ -160,6 +160,20 @@
             ]
         },
         {
+            "name": "addreferral",
+            "base": "",
+            "fields": [
+                {
+                    "name": "referrer",
+                    "type": "name"
+                },
+                {
+                    "name": "referee",
+                    "type": "name"
+                }
+            ]
+        },
+        {
             "name": "applyfriend",
             "base": "",
             "fields": [
@@ -230,7 +244,21 @@
             ]
         },
         {
-            "name": "apprcard",
+            "name": "apprcomment",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "accept",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "apprdcard",
             "base": "",
             "fields": [
                 {
@@ -244,6 +272,10 @@
                 {
                     "name": "cardname",
                     "type": "string"
+                },
+                {
+                    "name": "schema_name",
+                    "type": "name"
                 },
                 {
                     "name": "enableimg",
@@ -426,40 +458,6 @@
             ]
         },
         {
-            "name": "card",
-            "base": "",
-            "fields": [
-                {
-                    "name": "id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "gameid",
-                    "type": "uint64"
-                },
-                {
-                    "name": "cardname",
-                    "type": "string"
-                },
-                {
-                    "name": "enableimg",
-                    "type": "string"
-                },
-                {
-                    "name": "disableimg",
-                    "type": "string"
-                },
-                {
-                    "name": "series",
-                    "type": "string"
-                },
-                {
-                    "name": "candelete",
-                    "type": "bool"
-                }
-            ]
-        },
-        {
             "name": "card_s",
             "base": "",
             "fields": [
@@ -484,6 +482,10 @@
                 {
                     "name": "approve",
                     "type": "bool"
+                },
+                {
+                    "name": "template_id",
+                    "type": "int32"
                 }
             ]
         },
@@ -514,6 +516,10 @@
                 {
                     "name": "series",
                     "type": "string"
+                },
+                {
+                    "name": "schema_name",
+                    "type": "name"
                 }
             ]
         },
@@ -538,6 +544,10 @@
                 {
                     "name": "username",
                     "type": "name"
+                },
+                {
+                    "name": "nftstandard",
+                    "type": "uint8"
                 }
             ]
         },
@@ -566,6 +576,32 @@
                 {
                     "name": "startpoints",
                     "type": "float64"
+                }
+            ]
+        },
+        {
+            "name": "comentaprove",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "gameid",
+                    "type": "uint64"
+                },
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "rate",
+                    "type": "float64"
+                },
+                {
+                    "name": "comment",
+                    "type": "string"
                 }
             ]
         },
@@ -606,6 +642,48 @@
                 {
                     "name": "value",
                     "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "dcard",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "gameid",
+                    "type": "uint64"
+                },
+                {
+                    "name": "cardname",
+                    "type": "string"
+                },
+                {
+                    "name": "enableimg",
+                    "type": "string"
+                },
+                {
+                    "name": "disableimg",
+                    "type": "string"
+                },
+                {
+                    "name": "templateid",
+                    "type": "int32"
+                },
+                {
+                    "name": "schema_name",
+                    "type": "name"
+                },
+                {
+                    "name": "series",
+                    "type": "string"
+                },
+                {
+                    "name": "candelete",
+                    "type": "bool"
                 }
             ]
         },
@@ -662,6 +740,28 @@
                 {
                     "name": "series",
                     "type": "series_s[]"
+                }
+            ]
+        },
+        {
+            "name": "gamerate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "gameid",
+                    "type": "uint64"
+                },
+                {
+                    "name": "rate",
+                    "type": "float64"
+                },
+                {
+                    "name": "comment",
+                    "type": "string"
                 }
             ]
         },
@@ -986,6 +1086,24 @@
             ]
         },
         {
+            "name": "rate_record",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "rate",
+                    "type": "float64"
+                },
+                {
+                    "name": "comment",
+                    "type": "string"
+                }
+            ]
+        },
+        {
             "name": "rategame",
             "base": "",
             "fields": [
@@ -995,7 +1113,7 @@
                 },
                 {
                     "name": "totalstars",
-                    "type": "uint64"
+                    "type": "float64"
                 },
                 {
                     "name": "totalvotes",
@@ -1006,8 +1124,26 @@
                     "type": "float64"
                 },
                 {
-                    "name": "coments",
-                    "type": "string[]"
+                    "name": "records",
+                    "type": "rate_record[]"
+                }
+            ]
+        },
+        {
+            "name": "referral",
+            "base": "",
+            "fields": [
+                {
+                    "name": "account",
+                    "type": "name"
+                },
+                {
+                    "name": "referrer",
+                    "type": "name"
+                },
+                {
+                    "name": "referee",
+                    "type": "name[]"
                 }
             ]
         },
@@ -1218,6 +1354,10 @@
                 {
                     "name": "nickname",
                     "type": "string"
+                },
+                {
+                    "name": "referrer",
+                    "type": "name"
                 }
             ]
         },
@@ -1272,8 +1412,18 @@
             "ricardian_contract": ""
         },
         {
+            "name": "addreferral",
+            "type": "addreferral",
+            "ricardian_contract": ""
+        },
+        {
             "name": "applyfriend",
             "type": "applyfriend",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "apprcomment",
+            "type": "apprcomment",
             "ricardian_contract": ""
         },
         {
@@ -1339,6 +1489,11 @@
         {
             "name": "gameapprove",
             "type": "gameapprove",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "gamerate",
+            "type": "gamerate",
             "ricardian_contract": ""
         },
         {
@@ -1440,8 +1595,8 @@
             "key_types": []
         },
         {
-            "name": "apprcards",
-            "type": "apprcard",
+            "name": "apprdcards",
+            "type": "apprdcard",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
@@ -1475,8 +1630,15 @@
             "key_types": []
         },
         {
-            "name": "cards",
-            "type": "card",
+            "name": "comentapprs",
+            "type": "comentaprove",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "dcards",
+            "type": "dcard",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
@@ -1526,6 +1688,13 @@
         {
             "name": "rategames",
             "type": "rategame",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "referrals",
+            "type": "referral",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
